@@ -1,0 +1,391 @@
+/****
+
+
+Techvinz Lib
+Name: Chibundo Ilonze
+Email: Techyvinz@gmail.com
+
+
+****/
+
+body,html{
+    width:100%;
+    height:100%;
+    padding:0;
+    margin:0;
+    overflow:hidden
+}
+
+::-webkit-scrollbar {
+    width: 6px!important;
+    height: 6px!important;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(123,123,123, .2);
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(245,245,245,.1);
+}
+
+h1{
+    color:bisque;
+}
+
+button {
+    outline: none;
+    padding: 0;
+    cursor: pointer;
+    background: none;
+    border: 0;
+}
+
+.fixontop {
+    position: fixed;
+    top: 0;
+    /*right: 0;
+    left: 0;*/
+    z-index: 1030;
+}
+
+.home-header{
+    background: rgb(202, 202, 202);
+    padding: 5px 10px;
+    width: 100%;
+}
+
+.row>* {
+    padding: 0;
+}
+
+.img-icon{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    
+}
+
+.img-div{
+    width: 52%;
+    display: inline-block;
+}
+
+.status-div{
+    display: inline-block;
+    margin-right: 6%;
+}
+
+.line-div{
+    display: inline-block;
+}
+
+.chat-div{
+    display: inline-block;
+    margin-right: 6%;
+}
+
+.dt-cluster{
+    padding: 10px 0px 10px 20px;
+    width: 100%;
+}
+
+.hdua{
+    border-left: 1px solid #ddd
+}
+
+.name-icon{
+    color: rgb(34, 34, 34);
+    margin-left: 8px;
+}
+
+
+.sidebar {
+    position: fixed;
+    overflow: auto;
+  }
+
+  .sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+  }
+  
+
+.scrollarea {
+    z-index: 1;
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.sender {
+    position: fixed;
+    z-index: 1;
+    bottom: 0;
+    box-sizing: border-box;
+    order: 3;
+    width: inherit;
+    min-height: 62px;
+    flex: 0 0 auto;
+}
+
+.content-sticky {
+    position: relative;
+    top: 0; 
+    height: calc(100vh - 48px);
+    padding-top: .9rem;
+    padding-bottom: 7rem;
+    overflow-y: auto; 
+
+  }
+
+.msg-content {
+    position: relative;
+    z-index: 1;
+    order: 2;
+    flex: 1 1 0px;
+    overflow-y: auto;
+    background-color: rgb(255, 225, 211);
+}
+
+.arrange-input{
+    padding: 10px 30px
+}
+
+.receive{
+    position: relative;
+    font-size: 14.2px;
+    line-height: 19px;
+    color: rgb(34, 34, 34);
+    flex: 0 0 auto;    
+    box-sizing: border-box;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    margin-left: 5.5rem;
+    display: block;
+    margin-top:.3rem;
+}
+
+.send{
+    position: relative;
+    font-size: 14.2px;
+    line-height: 19px;
+    color: rgb(34, 34, 34);
+    flex: 0 0 auto;    
+    box-sizing: border-box;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    display: block;
+    padding-right: 5.5rem;
+    right: 0;
+    width: 100%;
+    margin-top:.3rem;
+}
+
+.inner-text{
+    box-shadow: 0 1px 0.5px rgba(39, 39, 39, 0.13);
+    background: rgb(255, 255, 255);
+    max-width: 65%;
+    float: left;
+    clear: both;
+    margin-top: .3rem;
+    padding: 6px 7px 8px 9px;
+    border-radius: 8px;   
+}
+
+.inner-text-send{
+    box-shadow: 0 1px 0.5px rgba(39, 39, 39, 0.13);
+    background: rgb(220, 255, 201);
+    max-width: 65%;
+    float: right;
+    clear: both;
+    margin-top: .3rem;
+    padding: 6px 7px 8px 9px;
+    border-radius: 8px;   
+}
+
+.userams{
+    position: relative;
+    overflow-wrap: break-word;
+    white-space: normal/*pre-wrap*/;
+}
+
+.divider{
+    width:100%;
+    height: .8rem;
+    background-color: none;
+    float: left;
+}
+
+.chat-profile-div{
+    margin: 4px auto 0px
+}   
+
+.chat-profile-icon{
+    width: 49px;
+    height: 49px;
+    border-radius: 50%;
+    cursor: pointer;  
+}
+
+.pf-icon{
+    width: 82px;
+    height: 82px;
+    border-radius: 50%;
+    cursor: pointer;  
+}
+
+.hans{
+    transition: none 0s ease 0s;
+}
+
+.profile-date{
+    font-size: 12px;
+}
+
+.profile-name{
+    font-size: 16;
+    font-weight: bold;
+}
+
+.profile-message{
+    display: flex;
+    align-items: center;
+    min-height: 20px;
+    font-size: 13px;
+    line-height: 20px;
+}
+
+.inpm{
+    flex-grow: 1;
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.capol{
+    flex: none;
+    max-width: 100%;
+    font-size: 12px;
+    line-height: 20px;
+    align-items: flex-end;
+}
+
+.innerlabel{
+    min-width: 0.8em;
+    min-height: 1em;
+    background-color: #25d366;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    vertical-align: top;
+    line-height: normal;
+}
+
+.chat-name{
+    width: 93%;
+    display: inline-block;
+}
+
+.chat-setting{
+    width: 5%;
+    display: inline-block;
+}
+
+.chat-send{
+    padding: 5px 10px;
+    width: 37px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+}
+
+.checkwot{
+    width: 480px;
+    border: 0;
+}
+
+.off-bg{
+    background-color: #008069;
+    padding: 50px 0 20px 20px;
+    font-size: 21px;
+    color: #fff;
+    font-weight: 400;
+    display: inline;
+}
+
+.pf-hands{
+    border: 0;
+}
+
+.btn-closer{
+    box-sizing: content-box;
+    width: 1em;
+    height: 1em;
+    padding: 0.25em 0.25em;
+    color: #fff;
+    border: 0;
+    opacity: .9;
+}
+
+#imagetag{
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+}
+
+.photopicker{
+    cursor: pointer;
+    margin-right: auto;
+    margin-left: auto;
+    text-align: center;
+}
+
+.photopicker:hover span{
+    display: block;
+}
+
+.photopicker span{
+    display: none;
+    position: absolute;
+    line-height: 14px;
+    text-align: center;
+    margin-top: 19.5%;
+    margin-left: 45px;
+    font-weight: 500;
+}
+
+.ahhda{
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.ahhda:hover{
+    opacity: .3;
+}
+
+#attachement{
+    padding: 0 11px;
+}
+
+.people-home{
+    width: 100%;
+    height: auto;
+    
+}
