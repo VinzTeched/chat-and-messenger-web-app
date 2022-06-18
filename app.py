@@ -78,7 +78,7 @@ class Post(db.Model):
     date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
 
 def add_users():
-    for _ in range(30):
+    for _ in range(200):
         names = fake.name()
         user = User(
             name = names,
@@ -226,19 +226,29 @@ def register():
         return render_template("register.html")
 
 
-@app.route("/")
+@app.route('/', methods = ['GET'])
 @login_required
 def index():
     id = session['user_id']
     user = User.query.filter_by(id=id).first()
     potential_friends = User.query.filter(User.id.isnot(id)).all()
-    return render_template('index.html', user=user, potential_friends=potential_friends)
+    page = request.args.get('page', 1, type=int)
+    records = User.query.paginate(page=page, per_page=20)
+    if "hx_request"  in request.headers:
+        return render_template("table.html", datas = records)
+    return render_template('index.html', **locals())
 
 @app.route("/add-friend")
 def addFriend():
     page = request.args.get('page', 1, type=int)
-    add_users = User.query.paginate(page=page, per_page=20)
-    return render_template("index.html", add_users=add_users)
+    add_users = User.query.paginate(page=page, per_page=50)
+    return render_template("table.html", datas = add_users)
+
+@app.route("/get_next_rows")
+def get_next_rows(request):
+    offset = int(request.GET['offset'])
+    add_users = User.query.paginate(page=offset, per_page=offset+50)
+    return render_template('table.html', datas=add_users)
 
 @app.route('/<name>/<location>')
 def gjsk(name, location):

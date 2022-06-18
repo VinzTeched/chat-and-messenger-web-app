@@ -1,4 +1,25 @@
+      
+      {% macro htmx_infinite_table_rows(paginate, endpoint) -%}
+      {% for item in paginate.items -%}
+        {% if loop.last and paginate.has_next -%}
+        <div
+          hx-get="{{ url_for(endpoint, page=paginate.next_num) }}"
+          hx-trigger="intersect once "
+          hx-swap="afterend"
+        >
+        {% else -%}
+        <div>
+        {% endif -%}
+          {{ caller(item) }}
+        </div>
+      {% endfor -%}
+    {% endmacro -%}
 
+{% if 'hx_request' in request.headers -%}
+{% call(record) htmx_infinite_table_rows(records, 'index') -%}
+  <p>{{ record.name }}</p>
+{% endcall -%}
+{% else -%}
 <!doctype html>
 <html lang="en">
   <head>
@@ -7,7 +28,7 @@
     <meta name="description" content="">
     <meta name="author" content="Techvinz">
     <meta name="generator" content="Generate it later">
-    <title>Vinochat - Chat away with friends</title>
+    <title>Try- Chat away with friends</title>
     <link href="/static/bootstrap.min.css" rel="stylesheet">
     <link href="/static/main.css" rel="stylesheet">
 
@@ -193,7 +214,7 @@
     <button type="button" class="btn-closer" data-bs-dismiss="offcanvas" aria-label="Close">&#8592</button>
     <span class="offcanvas-title" id="offcanvasScrollingLabel">New Chat</span>
   </div>
-  <div class="offcanvas-body">
+  <div class="offcanvas-body" >
     <div class="align-items-center flex-shrink-0 p-4 link-dark text-decoration-none border-bottom">
       <form role="search">
         <div class="input-group flex-nowrap">
@@ -202,34 +223,37 @@
         </div>
       </form>
     </div>
-
-      {% for data in records.items %}
-        {% if loop.last and records.has_next %}
-          <div class="infinite-scroll" name=" " hx-get="{{ url_for('index', page=records.next_num) }}" hx-trigger="intersect once" hx-swap="afterend">
-        {% else %}
-          <div>
-        {% endif %}
-            <!-- start message -->
-            <a href="#" class="list-group-item list-group-item-action hans" aria-current="true" style="border:0">
-              <div class="row">
-                <div class="col-lg-2">
-                  <div class="d-flex w-100 align-items-center justify-content-between">
-                  <span class="chat-profile-div"><img src="{{ data.image | user_image }}" class="chat-profile-icon" draggable="false"></span>
-                  </div>
-                </div>
-                <div class="col-lg-10">
-                  <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
-                      <span class="profile-name">{{ data.name }}</span>
-                  </div>
-                  <div class="d-flex w-100 align-items-center justify-content-between pe-2">
-                    <div class="inpm">{{ data.about }}</div>
-                    </div>
-                </div>
-              </div>
-            </a>
-            <!-- End messages -->
+    <div class="" hx-indicator=".htmx-indicator">
+      {# % for potential_friend in potential_friends %}
+       <!-- start message ->
+       <a href="#" class="list-group-item list-group-item-action hans" aria-current="true" style="border:0">
+        <div class="row">
+          <div class="col-lg-2">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+            <span class="chat-profile-div"><img src="{{ potential_friend.image | user_image }}" class="chat-profile-icon" draggable="false"></span>
+            </div>
           </div>
-      {% endfor %}
+          <div class="col-lg-10">
+            <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
+                <span class="profile-name">{{ potential_friend.name }}</span>
+            </div>
+            <div class="d-flex w-100 align-items-center justify-content-between pe-2">
+              <div class="inpm">{{ potential_friend.about }}</div>
+              </div>
+          </div>
+        </div>
+      </a-->
+      <!-- End messages -->
+      {% endfor % #}
+
+
+
+{% call(record) htmx_infinite_table_rows(records, 'index') -%}
+            <p>{{ record.name }}</p>
+          {% endcall -%}
+  </div>
+      <centre><img class="htmx-indicator" width="60" src="https://htmx.org/img/bars.svg"></centre>
+      
 
   </div>
 </div>
@@ -449,6 +473,7 @@
 
     <script src="/static/jquery-3.6.0.min.js"></script>
     <script src="/static/bootstrap.bundle.min.js"></script>
+    <script src="/static/htmx.min.js"></script>
     <script>
       $('#imagetag').click(function(){
         $('#upload').click();
@@ -484,6 +509,6 @@
 
       });
     </script>
-<script src="https://unpkg.com/htmx.org@1.7.0" integrity="sha384-EzBXYPt0/T6gxNp0nuPtLkmRpmDBbjg6WmCUZRLXBBwYYmwAUxzlSGej0ARHX0Bo" crossorigin="anonymous"></script>
   </body>
 </html>
+{% endif -%}
