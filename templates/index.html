@@ -75,7 +75,7 @@
     <header class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 shadow">
       <div class="col-md-4 col-lg-4">
         <div class="dt-cluster">
-          <span class="img-div"><img src="/static/images/photo.jpeg" class="img-icon" draggable="false"></span>
+          <span class="img-div"><img src="{{ user.image | user_image }}" class="img-icon" draggable="false"></span>
           <span class="status-div">
             <svg version="1.1" id="df9d3429-f0ef-48b5-b5eb-f9d27b2deba6" x="0" y="0" viewBox="0 0 24 24" width="24" height="24" class=""><path fill="currentColor" d="M12.072 1.761a10.05 10.05 0 0 0-9.303 5.65.977.977 0 0 0 1.756.855 8.098 8.098 0 0 1 7.496-4.553.977.977 0 1 0 .051-1.952zM1.926 13.64a10.052 10.052 0 0 0 7.461 7.925.977.977 0 0 0 .471-1.895 8.097 8.097 0 0 1-6.012-6.386.977.977 0 0 0-1.92.356zm13.729 7.454a10.053 10.053 0 0 0 6.201-8.946.976.976 0 1 0-1.951-.081v.014a8.097 8.097 0 0 1-4.997 7.209.977.977 0 0 0 .727 1.813l.02-.009z"></path><path fill="#009588" d="M19 1.5a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"></path></svg>
           </span>
@@ -127,15 +127,15 @@
       <div class="row">
         <div class="col-lg-3">
           <div class="d-flex w-100 align-items-center justify-content-between">
-          <span class="pf-div"><img src="/static/images/photo.jpeg" class="pf-icon" draggable="false"></span>
+          <span class="pf-div"><img src="{{ user.image | user_image }}" class="pf-icon" draggable="false"></span>
           </div>
         </div>
         <div class="col-lg-9">
           <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-3">
-              <span class="profile-name mb-1">My Naughty Aunty Mandarin</span>
+              <span class="profile-name mb-1">{{ user.name }}</span>
           </div>
           <div class="d-flex w-100 align-items-center justify-content-between pe-2">
-            <div class="inpm">Some placeholder content in a paragraph below the heading and date. Another placeholder content in a paragraph below the heading and date.</div>
+            <div class="inpm">{{ user.about }}</div>
           </div>
         </div>
       </div>
@@ -202,26 +202,33 @@
         </div>
       </form>
     </div>
-
-       <!-- start message -->
+      {% for potential_friend in potential_friends %}
+       <!-- start message ->
        <a href="#" class="list-group-item list-group-item-action hans" aria-current="true" style="border:0">
         <div class="row">
           <div class="col-lg-2">
             <div class="d-flex w-100 align-items-center justify-content-between">
-            <span class="chat-profile-div"><img src="/static/images/unnamed.png" class="chat-profile-icon" draggable="false"></span>
+            <span class="chat-profile-div"><img src="{{ potential_friend.image | user_image }}" class="chat-profile-icon" draggable="false"></span>
             </div>
           </div>
           <div class="col-lg-10">
             <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
-                <span class="profile-name">Beautiful Girl</span>
+                <span class="profile-name">{{ potential_friend.name }}</span>
             </div>
             <div class="d-flex w-100 align-items-center justify-content-between pe-2">
-              <div class="inpm">Some placeholder content in a paragraph below the heading and date. Another placeholder content in a paragraph below the heading and date.</div>
+              <div class="inpm">{{ potential_friend.about }}</div>
               </div>
           </div>
         </div>
-      </a>
+      </a-->
       <!-- End messages -->
+      {% endfor %}
+
+      <div class="" name="load" hx-trigger="scroll" hx-target="#friends" hx-get="{{ url_for(endpoint, page=paginate.next_num) }}"
+      hx-trigger="revealed"
+      hx-swap="afterend">
+        <div id="friends"></div>
+      </div>
 
   </div>
 </div>
@@ -241,24 +248,24 @@
           <span id="change">Change Photo</span>
           <div class="ahhda">
             <input type='file' id="upload" style="display:none" accept="image/gif,image/jpeg,image/jpg,image/png"/>
-            <img id="imagetag" src="/static/images/150x150.png"  alt="profile image"/>
+            <img id="imagetag" src="{{ user.image | user_image }}"  alt="profile image"/>
           </div>
         </div>
       </div>
 
         <div class="mb-3">
           <label for="name" class="form-label">Name</label>
-          <input type="text" class="form-control" id="name" name="name" placeholder="John Doe">
+          <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" placeholder="John Doe">
         </div>
 
         <div class="mb-3">
           <label for="email" class="form-label">Email</label>
-          <input type="email" class="form-control readonly disabled" id="email" name="email" readonly disabled placeholder="name@example.com" aria-label="Email">
+          <input type="email" class="form-control readonly disabled" id="email" name="email" value="{{ user.email }}" readonly disabled placeholder="name@example.com" aria-label="Email">
         </div>
 
         <div class="mb-3">
           <label for="about" class="form-label">About</label>
-          <textarea class="form-control" id="about" rows="3" name="about"></textarea>
+          <textarea class="form-control" id="about" rows="3" name="about">{{ user.about }}</textarea>
         </div>
 
         <div class="col-auto">
@@ -350,18 +357,18 @@
 
             <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
               <div class="photopicker" title="Photo Viewer">
-                  <img id="imagetag" src="/static/images/150x150.png"  alt="profile image"/>
+                  <img id="imagetag" src="{{ user.name | user_image }}"  alt="profile image"/>
               </div>
             </div>
 
             <div class="mb-3">
               <label for="name" class="form-label">Name</label>
-              <input type="text" class="form-control" id="name" name="name" placeholder="John Doe">
+              <input type="text" class="form-control" id="name" name="name" placeholder="John Doe" value="{{ user.name }}">
             </div>
 
             <div class="mb-3">
               <label for="about" class="form-label">About</label>
-              <textarea class="form-control" id="about" rows="3" name="about"></textarea>
+              <textarea class="form-control" id="about" rows="3" name="about">{{ user.about }}</textarea>
             </div>
 
           </div>
@@ -476,6 +483,6 @@
 
       });
     </script>
-
+<script src="https://unpkg.com/htmx.org@1.7.0" integrity="sha384-EzBXYPt0/T6gxNp0nuPtLkmRpmDBbjg6WmCUZRLXBBwYYmwAUxzlSGej0ARHX0Bo" crossorigin="anonymous"></script>
   </body>
 </html>

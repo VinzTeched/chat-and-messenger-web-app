@@ -138,6 +138,14 @@
     </header>
     {% endif %}
 
+    {% if error %}
+    <header>
+        <div class="alert alert-primary mb-0 text-center" role="alert">
+            {{ error }}
+        </div>
+    </header>
+    {% endif %} 
+
   </div>
 
   <div class="container col-xl-10 col-xxl-10 px-4 py-5">

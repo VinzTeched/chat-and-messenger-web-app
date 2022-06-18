@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
 from email.policy import default
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 import random
 
-from helpers import apology, login_required
+from helpers import login_required, user_image
+from image import createImage
 from faker import Faker
 
 fake = Faker()
@@ -16,6 +17,9 @@ app = Flask("__name__")
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chat.db'
+
+# Custom filter
+app.jinja_env.filters["user_image"] = user_image
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
@@ -75,10 +79,12 @@ class Post(db.Model):
 
 def add_users():
     for _ in range(30):
+        names = fake.name()
         user = User(
-            name = fake.name(),
+            name = names,
             email = fake.email(),
-            password = generate_password_hash('12345') 
+            password = generate_password_hash('12345'),
+            image = createImage(names) 
         )
         db.session.add(user)
     db.session.commit()
@@ -174,10 +180,10 @@ def register():
     """Register user"""
     if request.method == "POST":
 
-        name = request.form.get("name")
+        name = request.form.get("name").strip()
         email = request.form.get("email")
         password = request.form.get("password")
-        cpassword = request.form.get("confirmation")
+        cpassword = request.form.get("cpassword")
 
         if not name:
             flash("Please provide your name")
@@ -200,24 +206,21 @@ def register():
             return render_template("register.html")
 
         #check if user already exists
-        stars = db.execute("SELECT * FROM users WHERE username = ?", username)
+        if User.query.filter_by(email=email).first():
+            flash("Email already exist!" )
+            return render_template("register.html")
 
-        if stars:
-            return apology("username already exist!", 400)
+        image = createImage(name)
 
         # create user
-        db.execute("INSERT INTO users (username, hash) VALUES (?, ?)", username, generate_password_hash(password))
+        user = User(name=name, email=email, image=image, password=generate_password_hash(password))
+        db.session.add(user)
+        db.session.commit()
 
-        # retrieve user
-        rows = db.execute("SELECT * FROM users WHERE username = ?", username)
-
-        # call session
-        session["user_id"] = rows[0]["id"]
-
-        # show message
-        flash("Registered!")
-
-        return redirect("/")
+        # redirect to login and show message
+        #flash("Awesome, you have been registered!")
+        error = "Awesome, you have been registered! Please Login"
+        return render_template("login.html", error=error)
 
     else:
         return render_template("register.html")
@@ -226,7 +229,16 @@ def register():
 @app.route("/")
 @login_required
 def index():
-    return render_template('index.html')
+    id = session['user_id']
+    user = User.query.filter_by(id=id).first()
+    potential_friends = User.query.filter(User.id.isnot(id)).all()
+    return render_template('index.html', user=user, potential_friends=potential_friends)
+
+@app.route("/add-friend")
+def addFriend():
+    page = request.args.get('page', 1, type=int)
+    add_users = User.query.paginate(page=page, per_page=20)
+    return render_template("index.html", add_users=add_users)
 
 @app.route('/<name>/<location>')
 def gjsk(name, location):
