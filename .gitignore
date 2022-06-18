@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 
 chat.db
+flask_session/
+static/images/users/
