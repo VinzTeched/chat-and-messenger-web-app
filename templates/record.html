@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head></head>
+    <body>
+    
+      {% for data in datas.items %}
+        {% if loop.last and datas.has_next %}
+          <div class="infinite-scroll" name="intersect once " hx-get="{{ url_for('index', page=datas.next_num) }}" hx-trigger="intersect once " hx-swap="afterend">
+        {% else %}
+          <div  id="dispa-{{ data.id }}" >
+        {% endif %}
+      
+        <!-- start message -->
+        <div class="list-group-item list-group-item-action hans"aria-current="true" style="border:0">
+          <div class="row">
+            <div class="col-lg-2">
+              <div class="d-flex w-100 align-items-center justify-content-between">
+              <span class="chat-profile-div"><img src="{{ data.image | user_image }}" class="chat-profile-icon" draggable="false"></span>
+              </div>
+            </div>
+            <div class="col-lg-8">
+              <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
+                  <span class="profile-name">{{ data.name }}</span>
+              </div>
+              <div class="d-flex w-100 align-items-center justify-content-between pe-2">
+                <div class="inpm">{{ data.about }}</div>
+                </div>
+            </div>
+            <div class="col-lg-2">
+              <div class="pt-3">
+                <button class="btn btn-primary btn-sm add" id="add-{{ data.id }}">Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End messages -->
+          </div>
+      {% endfor %}
+
+      <script>
+        $(document).ready(function(e){
+            $(".add").click(function(){
+              var id=$(this).attr('id').split("-")[1];
+              $.ajax({
+                url:'/new-friend',
+                data:'friend_id='+id,
+                type: "POST",
+                beforeSend: function(){
+                  $('#add-'+id).text('Adding');
+                },
+                success: function(data){
+                  if(data == "success"){
+                    $('#add-'+id).text('Added');
+                    $('#add-'+id).attr('class', 'btn btn-sm btn-success');
+                  } else{
+                    alert(data)
+                    $('#add-'+id).text('Friends');
+                    $('#add-'+id).attr('class', 'btn btn-sm btn-secondary');
+                  }
+                }
+            });
+          });
+        });
+      </script>
+      
+    </body>
+</html>

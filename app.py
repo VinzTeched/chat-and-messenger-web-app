@@ -1,18 +1,28 @@
+from crypt import methods
 from datetime import datetime, timedelta
 from email.policy import default
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+import mimetypes
+from re import sub
+from unittest import result
+from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify, Response
+from sqlalchemy import alias, exists, subquery, text
 from flask_session import Session
+#from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 import random
+import builtins
+import jsonpickle
+from models import User, Message, user_friend
+from sqlalchemy.orm import aliased
 
 from helpers import login_required, user_image
 from image import createImage
-from faker import Faker
 
-fake = Faker()
+from models import db
 
 app = Flask("__name__")
+
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -21,10 +31,22 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chat.db'
 # Custom filter
 app.jinja_env.filters["user_image"] = user_image
 
+# Requires that "Less secure app access" be on
+# https://support.google.com/accounts/answer/6010255
+app.config["MAIL_DEFAULT_SENDER"] = "os.environ['MAIL_DEFAULT_SENDER']"
+app.config["MAIL_PASSWORD"] = "os.environ['MAIL_PASSWORD']"
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USERNAME"] = "os.environ['MAIL_USERNAME']"
+#mail = Mail(app)
+
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+db.init_app(app) # add line after all app config.
 
 @app.after_request
 def after_request(response):
@@ -34,104 +56,7 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
-# To create db run: flask shell Then from app import db Then db.create_all() Then you leave withexit with bracket
-
-db = SQLAlchemy(app)
-
-class User(db.Model):
-    #__tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    about = db.Column(db.String(500), nullable=True, default='Hey there, I am using Vinochat')
-    email = db.Column(db.String(100), nullable=False, unique=True)
-    image = db.Column(db.String(100), nullable=True)
-    password = db.Column(db.String(50), nullable=False)
-    reg_date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
-
-    friends = db.relationship('Friend', backref='user')
-    messages = db.relationship('Message', backref='user')
-
-user_post = db.Table('user_post', 
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-    db.Column('post_id', db.Integer, db.ForeignKey('post.id'), primary_key=True)
-)
-
-class Friend(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)
-    # one to many relationship to customers
-    friend_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
-
-class Message(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)
-    friend_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
-    attachement = db.Column(db.String(100), nullable=True)
-    message = db.Column(db.String(500), nullable=True)
-
-class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.String(500), nullable=True)
-    image = db.Column(db.String(50), nullable=True)
-    date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
-
-def add_users():
-    for _ in range(200):
-        names = fake.name()
-        user = User(
-            name = names,
-            email = fake.email(),
-            password = generate_password_hash('12345'),
-            image = createImage(names) 
-        )
-        db.session.add(user)
-    db.session.commit()
-
-
-def create_random_data():
-    db.create_all()
-    add_users()
-
-def get_orders_by(customer_id=1):
-    print('Get Orders by Customer')
-    customer_orders = Order.query.filter_by(customer_id=customer_id).all()
-    for order in customer_orders:
-        print(order.customer.first_name)
-
-def get_pending_orders():
-    print('Pending Orders')
-    pending_orders = Order.query.filter(Order.shipped_date.is_(None)).order_by(Order.order_date.desc()).all()
-    for order in pending_orders:
-        print(order.order_date)
-
-def how_many_customers():
-    print('How many customers?')
-    print(Customer.query.count())
-
-def orders_with_code():
-    print('Orders with coupon code')
-    orders = Order.query.filter(Order.coupon_code.isnot(None)).filter(Order.coupon_code != 'FREESHIPPING').all()
-    for order in orders:
-        print(order.coupon_code)
-
-def revenue_in_last_x_days(x_days=30):
-    print('Revenue past x days')
-    query = db.session.query(db.func.sum(Product.price)).join(order_product).join(Order).filter(Order.order_date > (datetime.now() - timedelta(days=x_days))).scalar()
-    print(query)
-
-def average_fulfillment_time():
-    print('Average Fulfillment Time')
-    query = db.session.query(db.func.time(db.func.avg(db.func.strftime('%s', Order.shipped_date) - db.func.strftime('%s', Order.order_date)), 'unixepoch')).filter(Order.shipped_date.isnot(None)).scalar()
-    print(query)
-
-def get_customers_who_have_purchased_x_dollars(amount=500):
-    print('All Customers who have purchased x dollars')
-    customers = db.session.query(Customer).join(Order).join(order_product).join(Product).group_by(Customer).having(db.func.sum(Product.price) > amount).all()
-    for customer in customers:
-        print(customer.first_name)
-
+#db = SQLAlchemy(app)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -217,8 +142,10 @@ def register():
         db.session.add(user)
         db.session.commit()
 
+        #message = Message("Registration completed successfully!", recipients=[email])
+        #mail.send(message)
+
         # redirect to login and show message
-        #flash("Awesome, you have been registered!")
         error = "Awesome, you have been registered! Please Login"
         return render_template("login.html", error=error)
 
@@ -231,24 +158,114 @@ def register():
 def index():
     id = session['user_id']
     user = User.query.filter_by(id=id).first()
-    potential_friends = User.query.filter(User.id.isnot(id)).all()
+    
+    if user is None:
+        return redirect("/login")
+
+    subq = db.session.query(user_friend).filter(user_friend.c.friend_id == id).subquery()
+    thefriends = User.query.join(subq, User.id == subq.c.user_id).all()
+    ourfriends = []
+    for afriend in user.friends:
+        ourfriends.append(afriend.id)
+    for ufriend in thefriends:
+        ourfriends.append(ufriend.id)
+    allfriends = User.query.filter(User.id.in_(ourfriends))
     page = request.args.get('page', 1, type=int)
-    records = User.query.paginate(page=page, per_page=20)
-    if "hx_request"  in request.headers:
-        return render_template("table.html", datas = records)
+    get_potential_friends = User.query.filter(~User.id.in_(ourfriends))
+    records = get_potential_friends.paginate(page=page, per_page=20)
+    if "hx_request" in request.headers:
+        return render_template("record.html", datas = records)
     return render_template('index.html', **locals())
 
 @app.route("/add-friend")
 def addFriend():
     page = request.args.get('page', 1, type=int)
     add_users = User.query.paginate(page=page, per_page=50)
-    return render_template("table.html", datas = add_users)
+    return render_template("record.html", datas = add_users)
 
-@app.route("/get_next_rows")
-def get_next_rows(request):
-    offset = int(request.GET['offset'])
-    add_users = User.query.paginate(page=offset, per_page=offset+50)
-    return render_template('table.html', datas=add_users)
+@app.route('/new-friend', methods=['POST'])
+def newFriend():
+    if session.get("user_id") is None:
+        return redirect("/login")
+
+    id = session['user_id']
+    friend_id = request.form.get("friend_id")
+
+    if not friend_id:
+        return "Error: User not found!"
+
+    """myfriends = db.session.query(User).filter_by(id=id).all()
+    temp = []
+    for myfriend in myfriends:
+        element = myfriend.friend_id
+        temp.append(element)
+
+    a = set(temp)
+    n = int(friend_id)
+    if n in a:
+        return ("Error: You are friends already")"""
+
+    friend = User.query.filter_by(id=friend_id).first()
+    user = User.query.filter_by(id=id).first()
+
+    user.friends.append(friend)
+    db.session.commit()
+    return "success"
+
+@app.route('/search', methods=['POST'])
+def search():
+    search = request.form.get('search', None)
+    if search:
+        users = User.query.filter(User.name.like(f'%{search}%')).all()
+        return render_template('search.html', results=users)
+    id = session['user_id']
+    user = User.query.filter_by(id=id).first()
+    
+    if user is None:
+        return redirect("/login")
+
+    subq = db.session.query(user_friend).filter(user_friend.c.friend_id == id).subquery()
+    thefriends = User.query.join(subq, User.id == subq.c.user_id).all()
+    ourfriends = []
+    for afriend in user.friends:
+        ourfriends.append(afriend.id)
+    for ufriend in thefriends:
+        ourfriends.append(ufriend.id)
+    allfriends = User.query.filter(User.id.in_(ourfriends))
+    return render_template('search.html', results=allfriends)
+
+@app.route('/search-all', methods=['POST'])
+def searchall():
+    search = request.form.get('searchall', None)
+    if search:
+        users = User.query.filter(User.name.like(f'%{search}%')).all()
+        return render_template('allsearch.html', results=users)
+    id = session['user_id']
+    user = User.query.filter_by(id=id).first()
+    
+    if user is None:
+        return redirect("/login")
+
+    subq = db.session.query(user_friend).filter(user_friend.c.friend_id == id).subquery()
+    thefriends = User.query.join(subq, User.id == subq.c.user_id).all()
+    ourfriends = []
+    for afriend in user.friends:
+        ourfriends.append(afriend.id)
+    for ufriend in thefriends:
+        ourfriends.append(ufriend.id)
+    allfriends = User.query.filter(User.id.in_(ourfriends))
+    return render_template('allsearch.html', results=allfriends)
+
+
+@app.route('/get-message', methods=['POST'])
+def getMessage():
+    user_id = session['user_id']
+    friend_id = request.data.get("friend_id")
+    if not friend_id:
+        flash("User not found!")
+        return redirect("/")
+    messages = Message.query.filter(Message.user_id.like(user_id), Message.friend_id.like(friend_id)).all()
+    return Response(jsonpickle.encode(messages), mimetypes='application/json')
 
 @app.route('/<name>/<location>')
 def gjsk(name, location):

@@ -162,4 +162,13 @@ cython_debug/
 chat.db
 flask_session/
 static/images/users/
-/users
+**/users
+**/static/images/users
+oldapp.py
+templates/home.html
+**/templates/home.html
+static/images/favicon_io.zip
+static/images/site.webmanifest
+**/static/images/favicon_io.zip
+**/static/images/site.webmanifest
+

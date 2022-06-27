@@ -71,6 +71,20 @@
         <path fill-rule="evenodd" d="M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z"/>
       </symbol>
     </svg>
+
+    {% if get_flashed_messages() %}
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <img src="..." class="rounded me-2" alt="...">
+        <strong class="me-auto">Vinochat</strong>
+        <small>2 seconds ago</small>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        {{ get_flashed_messages() | join(" ") }}
+      </div>
+    </div>
+    {% endif %}
     
     <header class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 shadow">
       <div class="col-md-4 col-lg-4">
@@ -191,45 +205,66 @@
 <div class="offcanvas offcanvas-start checkwot" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling2" aria-labelledby="offcanvasScrollingLabel">
   <div class="offcanvas-header off-bg">
     <button type="button" class="btn-closer" data-bs-dismiss="offcanvas" aria-label="Close">&#8592</button>
-    <span class="offcanvas-title" id="offcanvasScrollingLabel">New Chat</span>
+    <span class="offcanvas-title" id="offcanvasScrollingLabel">Add Friends</span>
   </div>
   <div class="offcanvas-body">
     <div class="align-items-center flex-shrink-0 p-4 link-dark text-decoration-none border-bottom">
       <form role="search">
         <div class="input-group flex-nowrap">
           <span class="input-group-text" id="addon-wrapping">&#128269;</span>
-          <input type="text" class="form-control" placeholder="Search or start new chat" aria-label="Search" aria-describedby="addon-wrapping" style="width:100% !important">
+          <input type="text" class="form-control" placeholder="Search or start new chat" aria-label="Search" 
+            name="searchall"
+            aria-describedby="addon-wrapping" 
+            hx-post="/search-all" 
+            hx-trigger="keyup changed delay:500ms, search" 
+            hx-target="#search-results" 
+            hx-indicator=".htmx-indicator" style="width:100% !important">
         </div>
       </form>
     </div>
+    <h3 class="px-4 pt-2"> 
+      Search Friends
+      <span class="htmx-indicator"> 
+        <img src="/static/images/bars.svg"/> Searching... 
+       </span> 
+    </h3>
 
+    <div id="search-results">
       {% for data in records.items %}
         {% if loop.last and records.has_next %}
           <div class="infinite-scroll" name=" " hx-get="{{ url_for('index', page=records.next_num) }}" hx-trigger="intersect once" hx-swap="afterend">
         {% else %}
           <div>
         {% endif %}
+
             <!-- start message -->
-            <a href="#" class="list-group-item list-group-item-action hans" aria-current="true" style="border:0">
+            <div class="list-group-item list-group-item-action hans py-2" aria-current="true" style="border:0">
               <div class="row">
                 <div class="col-lg-2">
                   <div class="d-flex w-100 align-items-center justify-content-between">
                   <span class="chat-profile-div"><img src="{{ data.image | user_image }}" class="chat-profile-icon" draggable="false"></span>
                   </div>
                 </div>
-                <div class="col-lg-10">
+                <div class="col-lg-8">
                   <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
                       <span class="profile-name">{{ data.name }}</span>
                   </div>
                   <div class="d-flex w-100 align-items-center justify-content-between pe-2">
                     <div class="inpm">{{ data.about }}</div>
-                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-2">
+                  <div class="pt-3">
+                    <button class="btn btn-primary btn-sm add" id="add-{{ data.id }}">Add</button>
+                  </div>
                 </div>
               </div>
-            </a>
+            </div>
             <!-- End messages -->
+             
           </div>
       {% endfor %}
+      </div>
 
   </div>
 </div>
@@ -285,13 +320,63 @@
       <div class="">
         <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-white">
           <div class="align-items-center flex-shrink-0 p-4 link-dark text-decoration-none border-bottom">
-            <form role="search">
+            <form role="search" id="startNewChat">
               <div class="input-group flex-nowrap">
                 <span class="input-group-text" id="addon-wrapping">&#128269;</span>
-                <input type="text" class="form-control" placeholder="Search or start new chat" aria-label="Search" aria-describedby="addon-wrapping" style="width:100% !important">
+                <input type="text" class="form-control" placeholder="Search or start new chat" aria-label="Search" 
+                  name="search"
+                  aria-describedby="addon-wrapping" style="width:100% !important"
+                  hx-post="/search" 
+                  hx-trigger="keyup changed delay:500ms, search" 
+                  hx-target="#search-results" 
+                  hx-indicator=".htmx-indicator"
+                > 
               </div>
             </form>
           </div>
+          <!-- New chat -->
+          <div class="newchat" style="display: none;">
+          <div class="sidebar-sticky ">
+          <div class="list-group list-group-flush border-bottom">
+            <h3 class="px-4 pt-2"> 
+              Search Friends
+              <span class="htmx-indicator"> 
+                <img src="/static/images/bars.svg"/> Searching... 
+               </span> 
+            </h3>
+          <div id="search-results">
+            {% for friend in allfriends %}
+            <!-- start message -->
+            <div class="list-group-item list-group-item-action hans getFriendMessage" style="cursor: pointer;" id="message-{{friend.id}}">
+              <div class="row">
+                <div class="col-lg-2">
+                  <div class="d-flex w-100 align-items-center justify-content-between">
+                  <span class="chat-profile-div"><img src="{{ friend.image | user_image }}" class="chat-profile-icon" draggable="false"></span>
+                  </div>
+                </div>
+                <div class="col-lg-10">
+                  <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
+                      <span class="profile-name">{{ friend.name }}</span>
+                      <small class="profile-date text-muted">Saturday</small>
+                  </div>
+                  <div class="d-flex w-100 align-items-center justify-content-between pe-2">
+                    <div class="inpm">Some placeholder content in a paragraph below the heading and date. Another placeholder content in a paragraph below the heading and date.</div>
+                    <div class="capol"><span class="innerlabel text-white badge rounded-pill" aria-label="3 unread messages">2  </span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End messages -->
+            {% endfor %}
+          </div>
+
+          </div>
+          </div>
+          </div>
+          <!-- End New chat -->
+          
+          <!-- Chatting -->
+          <div class="chatting">
           <div class="sidebar-sticky ">
           <div class="list-group list-group-flush border-bottom">
 
@@ -305,7 +390,7 @@
                 </div>
                 <div class="col-lg-10">
                   <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
-                      <span class="profile-name">My Naughty Aunty Mandarin</span>
+                      <span class="profile-name">john doe</span>
                       <small class="profile-date">Saturday</small>
                   </div>
                   <div class="d-flex w-100 align-items-center justify-content-between pe-2">
@@ -317,17 +402,18 @@
             </a>
             <!-- End messages -->
 
+            {% for friend in allfriends %}
             <!-- start message -->
-            <a href="#" class="list-group-item list-group-item-action hans" aria-current="true">
+            <div class="list-group-item list-group-item-action hans getFriendMessage" style="cursor: pointer;" id="message-{{friend.id}}">
               <div class="row">
                 <div class="col-lg-2">
                   <div class="d-flex w-100 align-items-center justify-content-between">
-                  <span class="chat-profile-div"><img src="/static/images/unnamed.png" class="chat-profile-icon" draggable="false"></span>
+                  <span class="chat-profile-div"><img src="{{ friend.image | user_image }}" class="chat-profile-icon" draggable="false"></span>
                   </div>
                 </div>
                 <div class="col-lg-10">
                   <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
-                      <span class="profile-name">Beautiful Girl</span>
+                      <span class="profile-name">{{ friend.name }}</span>
                       <small class="profile-date text-muted">Saturday</small>
                   </div>
                   <div class="d-flex w-100 align-items-center justify-content-between pe-2">
@@ -336,11 +422,15 @@
                   </div>
                 </div>
               </div>
-            </a>
+            </div>
             <!-- End messages -->
+            {% endfor %}
 
           </div>
           </div>
+          </div>
+          <!-- End Chatting -->
+
         </div>
           
       </div>
@@ -358,7 +448,7 @@
 
             <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
               <div class="photopicker" title="Photo Viewer">
-                  <img id="imagetag" src="{{ user.name | user_image }}"  alt="profile image"/>
+                  <img id="imagetag" src="{{ user.image | user_image }}"  alt="profile image"/>
               </div>
             </div>
 
@@ -447,43 +537,114 @@
 </div>
 
 
-    <script src="/static/jquery-3.6.0.min.js"></script>
-    <script src="/static/bootstrap.bundle.min.js"></script>
-    <script>
-      $('#imagetag').click(function(){
-        $('#upload').click();
+  <script src="/static/jquery-3.6.0.min.js"></script>
+  <script src="/static/bootstrap.bundle.min.js"></script>
+  <script>
+    $('#imagetag').click(function(){
+      $('#upload').click();
+    });
+
+    $('#change').click(function(){
+      $('#upload').click();
+    });
+
+    $('#attachement').click(function(){
+      $('#upload-file').click();
+    });
+
+    $(function(){
+      $('#upload').change(function(){
+        var input = this;
+        var url = $(this).val();
+        var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+        if (input.files && input.files[0]&& (ext == "gif" || ext == "png" || ext == "jpeg" || ext == "jpg")) 
+        {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+              $('#imagetag').attr('src', e.target.result);
+            }
+          reader.readAsDataURL(input.files[0]);
+        }
+        else
+        {
+          $('#imagetag').attr('src', '/static/images/150x150.png');
+        }
       });
 
-      $('#change').click(function(){
-        $('#upload').click();
-      });
+    });
+  </script>
 
-      $('#attachement').click(function(){
-        $('#upload-file').click();
-      });
-
-      $(function(){
-        $('#upload').change(function(){
-          var input = this;
-          var url = $(this).val();
-          var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
-          if (input.files && input.files[0]&& (ext == "gif" || ext == "png" || ext == "jpeg" || ext == "jpg")) 
-          {
-              var reader = new FileReader();
-
-              reader.onload = function (e) {
-                $('#imagetag').attr('src', e.target.result);
+  <script>
+    $(document).ready(function(e){
+        $(".add").click(function(){
+          var id=$(this).attr('id').split("-")[1];
+          $.ajax({
+            url:'/new-friend',
+            data:'friend_id='+id,
+            type: "POST",
+            beforeSend: function(){
+              $('#add-'+id).text('Adding');
+            },
+            success: function(data){
+              if(data == "success"){
+                $('#add-'+id).text('Added');
+                $('#add-'+id).attr('class', 'btn btn-sm btn-success');
+              } else{
+                alert(data)
+                $('#add-'+id).text('Friends');
+                $('#add-'+id).attr('class', 'btn btn-sm btn-secondary');
               }
-            reader.readAsDataURL(input.files[0]);
-          }
-          else
-          {
-            $('#imagetag').attr('src', '/static/images/150x150.png');
+            }
+        });
+      });
+
+      $(".getFriendMessage").click(function(){
+        var id=$(this).attr('id').split("-")[1];
+        $.ajax({
+          url:'/get-message',
+          data:'friend_id='+id,
+          type: "POST",
+          beforeSend: function(){
+            //$('#add-'+id).text('Adding');
+          },
+          success: function(data){
+            alert(data)
+            //$('#add-'+id).text('Added');
+            //$('#add-'+id).attr('class', 'btn btn-sm btn-success');
           }
         });
-
       });
-    </script>
+
+      $("#startNewChat").click(function () {
+        $(".newchat").css("display", "block");
+      });
+
+    });
+  </script>
+
+<!--script>
+  $(document).ready(function(e){
+      $(".getFriendMessage").click(function(){
+        var id=$(this).attr('id').split("-")[1];
+        $.ajax({
+          url:'/get-message',
+          data:'friend_id='+id,
+          type: "POST",
+          beforeSend: function(){
+            //$('#add-'+id).text('Adding');
+          },
+          success: function(data){
+            alert(data)
+            //$('#add-'+id).text('Added');
+            //$('#add-'+id).attr('class', 'btn btn-sm btn-success');
+          }
+      });
+    });
+  });
+</script-->
+
+    
 <script src="https://unpkg.com/htmx.org@1.7.0" integrity="sha384-EzBXYPt0/T6gxNp0nuPtLkmRpmDBbjg6WmCUZRLXBBwYYmwAUxzlSGej0ARHX0Bo" crossorigin="anonymous"></script>
   </body>
 </html>
