@@ -1,3 +1,4 @@
+import os
 from crypt import methods
 from datetime import datetime, timedelta
 from email.policy import default
@@ -10,8 +11,10 @@ from flask_session import Session
 #from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
 import random
 import builtins
+import json
 import jsonpickle
 from models import User, Message, user_friend
 from sqlalchemy.orm import aliased
@@ -21,7 +24,13 @@ from image import createImage
 
 from models import db
 
+UPLOAD_FOLDER = 'static/images/users'
+ALLOWED_EXTENSIONS = set(['png', 'jpeg', 'jpg'])
+
 app = Flask("__name__")
+
+# Profile Images Upload Folder
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -158,9 +167,13 @@ def register():
 def index():
     id = session['user_id']
     user = User.query.filter_by(id=id).first()
+    session_friend = session.get('friend_id', id)
+    friend = User.query.filter_by(id=session_friend).first()
     
     if user is None:
         return redirect("/login")
+
+    messages = Message.query.filter(Message.user_id.like(user.id), Message.friend_id.like(id), Message.friend_id.like(friend.id)).all()
 
     subq = db.session.query(user_friend).filter(user_friend.c.friend_id == id).subquery()
     thefriends = User.query.join(subq, User.id == subq.c.user_id).all()
@@ -257,15 +270,94 @@ def searchall():
     return render_template('allsearch.html', results=allfriends)
 
 
+@app.route('/retrieve-message', methods=['GET'])
+def retrieveMessage():
+    user_id = session['user_id']
+    friend_id = session.get('friend_id', id)
+    messages = Message.query.filter(db.or_(db.and_(Message.user_id.like(user_id), Message.friend_id.like(friend_id)), db.and_(Message.friend_id.like(user_id), Message.user_id.like(friend_id))))
+   
+    return render_template('messages.html', messages=messages)
+
+@app.route('/retrieve-friend', methods=['GET'])
+def retrieveFriend():
+    friend_id = session.get('friend_id', id)
+    friend = User.query.filter_by(id=friend_id).first()
+
+    return render_template('fhead.html', friend=friend)
+
 @app.route('/get-message', methods=['POST'])
 def getMessage():
     user_id = session['user_id']
-    friend_id = request.data.get("friend_id")
+    session['friend_id'] = None
+    friend_id = request.form.get("friend_id")
     if not friend_id:
         flash("User not found!")
         return redirect("/")
-    messages = Message.query.filter(Message.user_id.like(user_id), Message.friend_id.like(friend_id)).all()
-    return Response(jsonpickle.encode(messages), mimetypes='application/json')
+    messages = Message.query.filter(db.or_(db.and_(Message.user_id.like(user_id), Message.friend_id.like(friend_id)), db.and_(Message.friend_id.like(user_id), Message.user_id.like(friend_id))))
+
+    session['friend_id'] = int(friend_id)
+    #return jsonify(messages)
+    return render_template('messages.html', messages=messages)
+
+@app.route('/send-message', methods=['POST'])
+def sendMessage():
+    user_id = session['user_id']
+    friend_id = session['friend_id']
+    message = request.form.get("message")
+
+    if not message:
+        return "Error"
+
+    if message:
+        query = Message(user_id=user_id, friend_id=friend_id, message=message)
+        db.session.add(query)
+        db.session.commit()
+
+    messages = Message.query.filter(db.or_(db.and_(Message.user_id.like(user_id), Message.friend_id.like(friend_id)), db.and_(Message.friend_id.like(user_id), Message.user_id.like(friend_id))))
+
+    return render_template('messages.html', messages=messages)
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/update-profile', methods=['POST'])
+def updateProfile():
+    id = session['user_id']
+    name = request.form.get("name")
+    about = request.form.get("about")
+    
+    if not name:
+        return f"<span style='color:red'>Name cannot be empty!</span>"
+
+    elif not about:
+        return ("<span style='color:red'>About cannot be empty!</span>")
+    
+    user = User.query.filter_by(id=id).first()
+    
+    if 'file' in request.files:
+        
+        file = request.files['file']
+
+        if file.filename == '':
+            return ("No file selected")
+        
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(path)
+    else:
+        filename = user.image
+    
+    
+    user.name = name
+    user.about = about
+    user.image = filename
+    db.session.commit()
+
+    return "<span style='color:green'>Profile Updated</span>"
+
+
 
 @app.route('/<name>/<location>')
 def gjsk(name, location):

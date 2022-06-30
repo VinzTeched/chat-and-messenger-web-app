@@ -86,7 +86,7 @@
     </div>
     {% endif %}
     
-    <header class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 shadow">
+    <header class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0">
       <div class="col-md-4 col-lg-4">
         <div class="dt-cluster">
           <span class="img-div"><img src="{{ user.image | user_image }}" class="img-icon" draggable="false"></span>
@@ -102,17 +102,18 @@
         </div>
       </div>
       <div class="col-md-8 col-lg-8">
-        <div class="dt-cluster hdua">
-          <div class="chat-name">
-            <img src="/static/images/unnamed.png" class="img-icon">
-            <span class="name-icon">Daddy</span>
+        {% if session["friend_id"] and session["friend_id"] != user.id %}
+        <div class="dt-cluster hdua shownow" style="display: none;">
+          <div class="chat-name" id="findFriendName" hx-get="/retrieve-friend" hx-trigger="click">
+            <img src="{{ friend.image | user_image }}" class="img-icon">
+            <span class="name-icon">{{ friend.name }}</span>
           </div>
           <div class="chat-setting">
             
             <div class="dropstart">
               <a class="" href="#" role="button" id="dropdownCenterBtn" data-bs-toggle="dropdown" aria-expanded="false">
                 <svg viewBox="0 0 24 24" width="24" height="24" class="">
-                  <path fill="currentColor" d="M12 7a2 2 0 1 0-.001-4.001A2 2 0 0 0 12 7zm0 2a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 9zm0 6a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 15z"></path>
+                  <path fill="#000" d="M12 7a2 2 0 1 0-.001-4.001A2 2 0 0 0 12 7zm0 2a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 9zm0 6a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 15z"></path>
                 </svg>
               </a>
             
@@ -125,6 +126,7 @@
 
           </div>
         </div>
+        {% endif %}
       </div>
     </header>
 
@@ -277,13 +279,14 @@
     <span class="offcanvas-title" id="offcanvasScrollingLabel">Profile</span>
   </div>
   <div class="offcanvas-body">
-    <form id="form1" runat="server">
+    <div id="profile-result"></div>
+    <form id="form" hx-encoding='multipart/form-data' hx-post="/update-profile" hx-target="#profile-result" hx-trigger="submit">
 
       <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
         <div class="photopicker" title="Photo Picker">
           <span id="change">Change Photo</span>
           <div class="ahhda">
-            <input type='file' id="upload" style="display:none" accept="image/gif,image/jpeg,image/jpg,image/png"/>
+            <input type='file' name="file" id="upload" style="display:none" accept="image/gif,image/jpeg,image/jpg,image/png"/>
             <img id="imagetag" src="{{ user.image | user_image }}"  alt="profile image"/>
           </div>
         </div>
@@ -328,7 +331,7 @@
                   aria-describedby="addon-wrapping" style="width:100% !important"
                   hx-post="/search" 
                   hx-trigger="keyup changed delay:500ms, search" 
-                  hx-target="#search-results" 
+                  hx-target="#search-shows" 
                   hx-indicator=".htmx-indicator"
                 > 
               </div>
@@ -344,7 +347,7 @@
                 <img src="/static/images/bars.svg"/> Searching... 
                </span> 
             </h3>
-          <div id="search-results">
+          <div id="search-shows">
             {% for friend in allfriends %}
             <!-- start message -->
             <div class="list-group-item list-group-item-action hans getFriendMessage" style="cursor: pointer;" id="message-{{friend.id}}">
@@ -380,31 +383,9 @@
           <div class="sidebar-sticky ">
           <div class="list-group list-group-flush border-bottom">
 
-            <!-- start message -->
-            <a href="#" class="list-group-item list-group-item-action active hans" aria-current="true">
-              <div class="row">
-                <div class="col-lg-2">
-                  <div class="d-flex w-100 align-items-center justify-content-between">
-                  <span class="chat-profile-div"><img src="/static/images/photo.jpeg" class="chat-profile-icon" draggable="false"></span>
-                  </div>
-                </div>
-                <div class="col-lg-10">
-                  <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
-                      <span class="profile-name">john doe</span>
-                      <small class="profile-date">Saturday</small>
-                  </div>
-                  <div class="d-flex w-100 align-items-center justify-content-between pe-2">
-                    <div class="inpm">Some placeholder content in a paragraph below the heading and date. Another placeholder content in a paragraph below the heading and date.</div>
-                    <div class="capol"><span class="innerlabel text-white badge rounded-pill" aria-label="3 unread messages">23</span></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <!-- End messages -->
-
             {% for friend in allfriends %}
             <!-- start message -->
-            <div class="list-group-item list-group-item-action hans getFriendMessage" style="cursor: pointer;" id="message-{{friend.id}}">
+            <div class="list-group-item list-group-item-action hans getFriendMessage hana{{friend.id}}" style="cursor: pointer;" id="message-{{friend.id}}">
               <div class="row">
                 <div class="col-lg-2">
                   <div class="d-flex w-100 align-items-center justify-content-between">
@@ -414,7 +395,7 @@
                 <div class="col-lg-10">
                   <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
                       <span class="profile-name">{{ friend.name }}</span>
-                      <small class="profile-date text-muted">Saturday</small>
+                      <small class="profile-date text-muted dateof{{friend.id}}">Saturday</small>
                   </div>
                   <div class="d-flex w-100 align-items-center justify-content-between pe-2">
                     <div class="inpm">Some placeholder content in a paragraph below the heading and date. Another placeholder content in a paragraph below the heading and date.</div>
@@ -468,70 +449,66 @@
     </nav>
 
     <main class="col-md-8 ms-sm-auto col-lg-8">
-      <div class="msg-content">
+      <div class="empty-content hidenow" >
+        <div class="startUpImage">
+          <h6>VCT</h6>
+        </div>
+        <h2 class="text-center mt-4 useColor">Vinochat</h2>
+        <h5 class="text-center mt-2 useColor">Chat away with friends</h5>
+      </div>
+
+      {% if session["friend_id"] and session["friend_id"] != user.id %}
+      <div class="msg-content shownow" style="display: none;">
         <div class="content-sticky">
-          <!-- receive message -->
-          <div class="receive">
-            <div class="inner-text">
-              <div class="userams">
-                It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
-              </div>
-            </div>
-          </div>
-          <!-- end receive message -->
 
-          <!-- receive message -->
-          <div class="receive">
-            <div class="inner-text">
-              <div class="userams">
-                Hi good evening<br>How are you doing
-              </div>
-            </div>
-          </div>
-          <!-- end receive message -->
 
-          <!-- receive message -->
-          <div class="receive">
-            <div class="inner-text">
-              <div class="userams">
-                It is a long established fact readable content of a page when looking at its layout.</div>
-            </div>
-          </div>
-          <!-- end receive message -->
-          <div class="divider"></div>
-          <!-- send message -->
-          <div class="send">
-            <div class="inner-text-send">
-              <div class="userams">
-                It is a long established fact readable content of a page when looking at its layout.
-              </div>
-            </div>
-          </div>
-          <!-- end send message -->
+          <div id="message-result" hx-get="/retrieve-message" hx-trigger="click, every 59s"> 
+            {% for message in messages %}
+              {% if message.user_id != session['user_id'] %}
+                  <!-- receive message -->
+                  <div class="receive">
+                      <div class="inner-text">
+                      <div class="userams">
+                          {{ message.message }}
+                      </div>
+                      </div>
+                  </div>
+                  <!-- end receive message -->
+              {% endif %}
 
-          <!-- send message -->
-          <div class="send">
-            <div class="inner-text-send">
-              <div class="userams">
-                It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
-               </div>
-            </div>
+                  <!--div class="divider"></div-->
+
+              {% if message.user_id == session['user_id'] %} 
+                  <!-- send message -->
+                  <div class="send">
+                      <div class="inner-text-send">
+                      <div class="userams">
+                          {{ message.message }}
+                      </div>
+                      </div>
+                  </div>
+                  <!-- end send message -->
+              {% endif %}
+
+            {% endfor %}
           </div>
-          <!-- end send message -->
+
+
         </div>
       </div>
-      <footer class="sender mt-auto py-3 bg-light">
+      <footer class="sender mt-auto py-3 bg-light shownow" style="display: none;"> 
           <div class="arrange-input">
-            <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
+            <form id="messageForm" hx-post="/send-message" hx-target="#message-result" hx-trigger="submit" class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
               <span data-testid="clip" data-icon="clip" id="attachement"><svg viewBox="0 0 24 24" width="24" height="24" class=""><path fill="currentColor" d="M1.816 15.556v.002c0 1.502.584 2.912 1.646 3.972s2.472 1.647 3.974 1.647a5.58 5.58 0 0 0 3.972-1.645l9.547-9.548c.769-.768 1.147-1.767 1.058-2.817-.079-.968-.548-1.927-1.319-2.698-1.594-1.592-4.068-1.711-5.517-.262l-7.916 7.915c-.881.881-.792 2.25.214 3.261.959.958 2.423 1.053 3.263.215l5.511-5.512c.28-.28.267-.722.053-.936l-.244-.244c-.191-.191-.567-.349-.957.04l-5.506 5.506c-.18.18-.635.127-.976-.214-.098-.097-.576-.613-.213-.973l7.915-7.917c.818-.817 2.267-.699 3.23.262.5.501.802 1.1.849 1.685.051.573-.156 1.111-.589 1.543l-9.547 9.549a3.97 3.97 0 0 1-2.829 1.171 3.975 3.975 0 0 1-2.83-1.173 3.973 3.973 0 0 1-1.172-2.828c0-1.071.415-2.076 1.172-2.83l7.209-7.211c.157-.157.264-.579.028-.814L11.5 4.36a.572.572 0 0 0-.834.018l-7.205 7.207a5.577 5.577 0 0 0-1.645 3.971z"></path></svg></span>   
               <input type='file' id="upload-file" style="display:none" accept="image/gif,image/jpeg,image/jpg,image/png"/>
               <input type="message" class="form-control" id="message" name="message" placeholder="Type a message">
               <div class="chat-send">
-                <button><span data-testid="send" data-icon="send"><svg viewBox="0 0 24 24" width="24" height="24" class=""><path fill="currentColor" d="M1.101 21.757 23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"></path></svg></span></button>
+                <button type="submit"><span data-testid="send" data-icon="send"><svg viewBox="0 0 24 24" width="24" height="24" class=""><path fill="currentColor" d="M1.101 21.757 23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"></path></svg></span></button>
               </div>
-            </div>
+            </form>
           </div>
       </footer>
+      {% endif %}
     </main>
   </div>
 </div>
@@ -606,43 +583,29 @@
           data:'friend_id='+id,
           type: "POST",
           beforeSend: function(){
+            $('.getFriendMessage').removeClass("active");
+            $('.profile-date').addClass("text-muted");
             //$('#add-'+id).text('Adding');
           },
           success: function(data){
-            alert(data)
-            //$('#add-'+id).text('Added');
-            //$('#add-'+id).attr('class', 'btn btn-sm btn-success');
+            $(".shownow").css("display", "block");
+            $(".hidenow").css("display", "none");
+            $('#findFriendName').trigger('click');
+            $('#message-result').trigger('click');
+            $('.hana'+id).addClass("active");
+            $('.dateof'+id).removeClass("text-muted");
           }
         });
       });
 
       $("#startNewChat").click(function () {
         $(".newchat").css("display", "block");
-      });
+      });  
 
     });
+
+
   </script>
-
-<!--script>
-  $(document).ready(function(e){
-      $(".getFriendMessage").click(function(){
-        var id=$(this).attr('id').split("-")[1];
-        $.ajax({
-          url:'/get-message',
-          data:'friend_id='+id,
-          type: "POST",
-          beforeSend: function(){
-            //$('#add-'+id).text('Adding');
-          },
-          success: function(data){
-            alert(data)
-            //$('#add-'+id).text('Added');
-            //$('#add-'+id).attr('class', 'btn btn-sm btn-success');
-          }
-      });
-    });
-  });
-</script-->
 
     
 <script src="https://unpkg.com/htmx.org@1.7.0" integrity="sha384-EzBXYPt0/T6gxNp0nuPtLkmRpmDBbjg6WmCUZRLXBBwYYmwAUxzlSGej0ARHX0Bo" crossorigin="anonymous"></script>

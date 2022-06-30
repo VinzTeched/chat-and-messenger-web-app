@@ -35,7 +35,8 @@ class User(db.Model):
     )
 
     # friends = db.relationship('Friend', backref='user')
-    messages = db.relationship('Message', backref='user')
+    # messages = db.relationship('Message', backref='user')
+    posts = db.relationship('Post', backref='user')
 
 user_post = db.Table('user_post', 
     db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
@@ -45,7 +46,8 @@ user_post = db.Table('user_post',
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
-    friend_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    friend_id = db.Column(db.Integer, nullable=False)
+    # friend_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
     attachement = db.Column(db.String(100), nullable=True)
     message = db.Column(db.String(500), nullable=True)
@@ -54,13 +56,8 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(500), nullable=True)
     image = db.Column(db.String(50), nullable=True)
-    date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
-
-""""class Friend(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    friend_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)"""
+    date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
 
 def add_users():
     for _ in range(250):

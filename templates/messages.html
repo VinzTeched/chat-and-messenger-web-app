@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head></head>
+    <body>
+       {% for message in messages %}
+
+            {% if message.user_id != session['user_id'] %}
+            <!-- receive message -->
+            <div class="receive">
+                <div class="inner-text">
+                <div class="userams">
+                    {{ message.message }}
+                </div>
+                </div>
+            </div>
+            <!-- end receive message -->
+        {% endif %}
+
+            <!--div class="divider"></div-->
+
+        {% if message.user_id == session['user_id'] %} 
+            <!-- send message -->
+            <div class="send">
+                <div class="inner-text-send">
+                <div class="userams">
+                    {{ message.message }}
+                </div>
+                </div>
+            </div>
+            <!-- end send message -->
+        {% endif %}
+
+       {% endfor %}
+      
+    </body>
+</html>
