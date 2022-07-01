@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head></head>
+    <body>
+        <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
+            <div class="photopicker" title="Photo Viewer">
+                <img id="imagetag" src="{{ friend.image | user_image }}"  alt="profile image"/>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" disabled name="name" placeholder="John Doe" value="{{ friend.name }}">
+          </div>
+
+          <div class="mb-3">
+            <label for="about" class="form-label">About</label>
+            <textarea class="form-control" id="about" disabled rows="3" name="about">{{ friend.about }}</textarea>
+          </div>
+    </body>
+</html>

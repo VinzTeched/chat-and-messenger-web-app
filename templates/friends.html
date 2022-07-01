@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <link href="/static/bootstrap.min.css" rel="stylesheet"></head>
+    <body>
+        {% for friend in friends %}
+          {% if friend.user.id != session['user_id'] %}
+            <!-- start message -->
+            <div class="list-group-item list-group-item-action hans getFriendMessage hana{{friend.user.id}}" style="cursor: pointer;" id="message-{{friend.user.id}}">
+              <div class="row">
+                <div class="col-lg-2">
+                  <div class="d-flex w-100 align-items-center justify-content-between">
+                  <span class="chat-profile-div"><img src="{{ friend.user.image | user_image }}" class="chat-profile-icon" draggable="false"></span>
+                  </div>
+                </div>
+                <div class="col-lg-10">
+                  <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
+                      <span class="profile-name">{{ friend.user.name }}</span>
+                      <small class="profile-date text-muted dateof{{friend.user.id}}">Saturday</small>
+                  </div>
+                  <div class="d-flex w-100 align-items-center justify-content-between pe-2">
+                    <div class="inpm">{% if friend.message %} {{friend.message}} {% endif %}</div>
+                    <div class="capol"><span class="innerlabel text-white badge rounded-pill" aria-label="3 unread messages">2  </span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End messages -->
+            {% endif %}
+            {% endfor %}
+
+
+  <script src="/static/main.js"></script>
+    </body>
+</html>

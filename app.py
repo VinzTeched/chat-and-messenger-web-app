@@ -1,3 +1,4 @@
+from email import message
 import os
 from crypt import methods
 from datetime import datetime, timedelta
@@ -196,6 +197,11 @@ def addFriend():
     add_users = User.query.paginate(page=page, per_page=50)
     return render_template("record.html", datas = add_users)
 
+def sendNewFriendMessage(user_id, friend_id):
+    query = Message(user_id=user_id, friend_id=friend_id, send_id=friend_id)
+    db.session.add(query)
+    db.session.commit()
+
 @app.route('/new-friend', methods=['POST'])
 def newFriend():
     if session.get("user_id") is None:
@@ -220,7 +226,7 @@ def newFriend():
 
     friend = User.query.filter_by(id=friend_id).first()
     user = User.query.filter_by(id=id).first()
-
+    sendNewFriendMessage(id, friend_id)
     user.friends.append(friend)
     db.session.commit()
     return "success"
@@ -275,14 +281,13 @@ def retrieveMessage():
     user_id = session['user_id']
     friend_id = session.get('friend_id', id)
     messages = Message.query.filter(db.or_(db.and_(Message.user_id.like(user_id), Message.friend_id.like(friend_id)), db.and_(Message.friend_id.like(user_id), Message.user_id.like(friend_id))))
-   
-    return render_template('messages.html', messages=messages)
+    if messages:
+        return render_template('messages.html', messages=messages)
 
 @app.route('/retrieve-friend', methods=['GET'])
 def retrieveFriend():
     friend_id = session.get('friend_id', id)
     friend = User.query.filter_by(id=friend_id).first()
-
     return render_template('fhead.html', friend=friend)
 
 @app.route('/get-message', methods=['POST'])
@@ -299,6 +304,7 @@ def getMessage():
     #return jsonify(messages)
     return render_template('messages.html', messages=messages)
 
+
 @app.route('/send-message', methods=['POST'])
 def sendMessage():
     user_id = session['user_id']
@@ -309,7 +315,7 @@ def sendMessage():
         return "Error"
 
     if message:
-        query = Message(user_id=user_id, friend_id=friend_id, message=message)
+        query = Message(user_id=user_id, friend_id=friend_id, send_id=user_id, message=message)
         db.session.add(query)
         db.session.commit()
 
@@ -320,6 +326,14 @@ def sendMessage():
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/all-user-message', methods=['GET'])
+def getAllUserMessage():
+    id = session['user_id']
+
+    friends = Message.query.filter(db.or_(Message.friend_id.like(id), Message.user_id.like(id))).join(User, User.id == Message.send_id).group_by(Message.send_id).order_by(Message.date.desc()).all()
+
+    return render_template('friends.html', friends=friends)
 
 @app.route('/update-profile', methods=['POST'])
 def updateProfile():
@@ -349,7 +363,6 @@ def updateProfile():
     else:
         filename = user.image
     
-    
     user.name = name
     user.about = about
     user.image = filename
@@ -358,6 +371,12 @@ def updateProfile():
     return "<span style='color:green'>Profile Updated</span>"
 
 
+
+@app.route('/contact-info', methods=['GET'])
+def contactInfo():
+    session_friend = session['friend_id']
+    friend = User.query.filter_by(id=session_friend).first()
+    return render_template('contact.html', friend=friend)
 
 @app.route('/<name>/<location>')
 def gjsk(name, location):

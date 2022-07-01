@@ -102,7 +102,6 @@
         </div>
       </div>
       <div class="col-md-8 col-lg-8">
-        {% if session["friend_id"] and session["friend_id"] != user.id %}
         <div class="dt-cluster hdua shownow" style="display: none;">
           <div class="chat-name" id="findFriendName" hx-get="/retrieve-friend" hx-trigger="click">
             <img src="{{ friend.image | user_image }}" class="img-icon">
@@ -118,15 +117,14 @@
               </a>
             
               <ul class="dropdown-menu" aria-labelledby="dropdownCenterBtn">
-                <li><a class="dropdown-item" href="#" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbarLight" aria-controls="offcanvasNavbarLight">Contact Info</a></li>
-                <li><a class="dropdown-item" href="#">Clear Messages</a></li>
+                <li><a class="dropdown-item" hx-get="/contact-info" hx-trigger="click" hx-target="#contact-info" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbarLight" aria-controls="offcanvasNavbarLight">Contact Info</a></li>
+                <li><a class="dropdown-item" href="#" hx-get="/contact-info" hx-trigger="click" hx-target="#contact-info"s>Clear Messages</a></li>
                 <li><a class="dropdown-item" href="#">Delete Chat</a></li>
               </ul>
             </div>
 
           </div>
         </div>
-        {% endif %}
       </div>
     </header>
 
@@ -383,29 +381,31 @@
           <div class="sidebar-sticky ">
           <div class="list-group list-group-flush border-bottom">
 
-            {% for friend in allfriends %}
-            <!-- start message -->
-            <div class="list-group-item list-group-item-action hans getFriendMessage hana{{friend.id}}" style="cursor: pointer;" id="message-{{friend.id}}">
-              <div class="row">
-                <div class="col-lg-2">
-                  <div class="d-flex w-100 align-items-center justify-content-between">
-                  <span class="chat-profile-div"><img src="{{ friend.image | user_image }}" class="chat-profile-icon" draggable="false"></span>
+            <div id="friend-result" hx-get="/all-user-message" hx-trigger="load, every 10s">
+              {% for friend in friends %}
+              <!-- start message -->
+              <div class="list-group-item list-group-item-action hans getFriendMessage hana{{friend.user.id}}" style="cursor: pointer;" id="message-{{friend.user.id}}">
+                <div class="row">
+                  <div class="col-lg-2">
+                    <div class="d-flex w-100 align-items-center justify-content-between">
+                    <span class="chat-profile-div"><img src="{{ friend.user.image | user_image }}" class="chat-profile-icon" draggable="false"></span>
+                    </div>
                   </div>
-                </div>
-                <div class="col-lg-10">
-                  <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
-                      <span class="profile-name">{{ friend.name }}</span>
-                      <small class="profile-date text-muted dateof{{friend.id}}">Saturday</small>
-                  </div>
-                  <div class="d-flex w-100 align-items-center justify-content-between pe-2">
-                    <div class="inpm">Some placeholder content in a paragraph below the heading and date. Another placeholder content in a paragraph below the heading and date.</div>
-                    <div class="capol"><span class="innerlabel text-white badge rounded-pill" aria-label="3 unread messages">2  </span></div>
+                  <div class="col-lg-10">
+                    <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
+                        <span class="profile-name">{{ friend.user.name }}</span>
+                        <small class="profile-date text-muted dateof{{friend.user.id}}">Saturday</small>
+                    </div>
+                    <div class="d-flex w-100 align-items-center justify-content-between pe-2">
+                      <div class="inpm">{% if friend.message %} friend.message {% endif %}</div>
+                      <div class="capol"><span class="innerlabel text-white badge rounded-pill" aria-label="3 unread messages">2  </span></div>
+                    </div>
                   </div>
                 </div>
               </div>
+              <!-- End messages -->
+              {% endfor %}  
             </div>
-            <!-- End messages -->
-            {% endfor %}
 
           </div>
           </div>
@@ -427,20 +427,24 @@
           </div>
           <div class="offcanvas-body">
 
-            <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
-              <div class="photopicker" title="Photo Viewer">
-                  <img id="imagetag" src="{{ user.image | user_image }}"  alt="profile image"/>
+            <div id="contact-info">
+
+              <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
+                <div class="photopicker" title="Photo Viewer">
+                    <img id="imagetag" src="{{ friend.image | user_image }}"  alt="profile image"/>
+                </div>
               </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="name" class="form-label">Name</label>
-              <input type="text" class="form-control" id="name" name="name" placeholder="John Doe" value="{{ user.name }}">
-            </div>
-
-            <div class="mb-3">
-              <label for="about" class="form-label">About</label>
-              <textarea class="form-control" id="about" rows="3" name="about">{{ user.about }}</textarea>
+    
+              <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" disabled name="name" placeholder="John Doe" value="{{ friend.name }}">
+              </div>
+    
+              <div class="mb-3">
+                <label for="about" class="form-label">About</label>
+                <textarea class="form-control" id="about" disabled rows="3" name="about">{{ friend.about }}</textarea>
+              </div>
+            
             </div>
 
           </div>
@@ -457,40 +461,12 @@
         <h5 class="text-center mt-2 useColor">Chat away with friends</h5>
       </div>
 
-      {% if session["friend_id"] and session["friend_id"] != user.id %}
       <div class="msg-content shownow" style="display: none;">
         <div class="content-sticky">
 
 
-          <div id="message-result" hx-get="/retrieve-message" hx-trigger="click, every 59s"> 
-            {% for message in messages %}
-              {% if message.user_id != session['user_id'] %}
-                  <!-- receive message -->
-                  <div class="receive">
-                      <div class="inner-text">
-                      <div class="userams">
-                          {{ message.message }}
-                      </div>
-                      </div>
-                  </div>
-                  <!-- end receive message -->
-              {% endif %}
-
-                  <!--div class="divider"></div-->
-
-              {% if message.user_id == session['user_id'] %} 
-                  <!-- send message -->
-                  <div class="send">
-                      <div class="inner-text-send">
-                      <div class="userams">
-                          {{ message.message }}
-                      </div>
-                      </div>
-                  </div>
-                  <!-- end send message -->
-              {% endif %}
-
-            {% endfor %}
+          <div id="message-result" hx-get="/retrieve-message" hx-trigger="click, every 10s"> 
+       
           </div>
 
 
@@ -508,7 +484,6 @@
             </form>
           </div>
       </footer>
-      {% endif %}
     </main>
   </div>
 </div>
@@ -552,62 +527,8 @@
     });
   </script>
 
-  <script>
-    $(document).ready(function(e){
-        $(".add").click(function(){
-          var id=$(this).attr('id').split("-")[1];
-          $.ajax({
-            url:'/new-friend',
-            data:'friend_id='+id,
-            type: "POST",
-            beforeSend: function(){
-              $('#add-'+id).text('Adding');
-            },
-            success: function(data){
-              if(data == "success"){
-                $('#add-'+id).text('Added');
-                $('#add-'+id).attr('class', 'btn btn-sm btn-success');
-              } else{
-                alert(data)
-                $('#add-'+id).text('Friends');
-                $('#add-'+id).attr('class', 'btn btn-sm btn-secondary');
-              }
-            }
-        });
-      });
+  <script src="/static/main.js"></script>
 
-      $(".getFriendMessage").click(function(){
-        var id=$(this).attr('id').split("-")[1];
-        $.ajax({
-          url:'/get-message',
-          data:'friend_id='+id,
-          type: "POST",
-          beforeSend: function(){
-            $('.getFriendMessage').removeClass("active");
-            $('.profile-date').addClass("text-muted");
-            //$('#add-'+id).text('Adding');
-          },
-          success: function(data){
-            $(".shownow").css("display", "block");
-            $(".hidenow").css("display", "none");
-            $('#findFriendName').trigger('click');
-            $('#message-result').trigger('click');
-            $('.hana'+id).addClass("active");
-            $('.dateof'+id).removeClass("text-muted");
-          }
-        });
-      });
-
-      $("#startNewChat").click(function () {
-        $(".newchat").css("display", "block");
-      });  
-
-    });
-
-
-  </script>
-
-    
 <script src="https://unpkg.com/htmx.org@1.7.0" integrity="sha384-EzBXYPt0/T6gxNp0nuPtLkmRpmDBbjg6WmCUZRLXBBwYYmwAUxzlSGej0ARHX0Bo" crossorigin="anonymous"></script>
   </body>
 </html>

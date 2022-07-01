@@ -4,12 +4,13 @@
     <body>
        {% for message in messages %}
 
+       {% if message.message != None %}
             {% if message.user_id != session['user_id'] %}
             <!-- receive message -->
             <div class="receive">
                 <div class="inner-text">
                 <div class="userams">
-                    {{ message.message }}
+                    {{ message.message|default('&nbsp;', true) }}
                 </div>
                 </div>
             </div>
@@ -23,11 +24,13 @@
             <div class="send">
                 <div class="inner-text-send">
                 <div class="userams">
-                    {{ message.message }}
+                    {{ message.message }} 
                 </div>
                 </div>
             </div>
             <!-- end send message -->
+        {% endif %}
+
         {% endif %}
 
        {% endfor %}
