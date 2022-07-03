@@ -9,7 +9,6 @@ from faker import Faker
 fake = Faker()
 
 db = SQLAlchemy()
-# To create db run: flask shell Then from app import db Then db.create_all() Then you leave withexit with bracket
 
 user_friend = db.Table('user_friend', 
     db.Column("friend_id", db.Integer, db.ForeignKey('users.id'), primary_key=True, nullable=False),

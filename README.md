@@ -24,6 +24,16 @@ Make sure you have installed
           
         pip install Flask Flask-Session Flask-SQLAlchemy faker PIL gevent flask_socketio
 
+* Setup sqlite database or anyother database
+
+        flask shell
+
+        from models import create_random_data
+        
+        create_random_data()
+
+        quit()
+        
 * start gevent server 
 
         gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 app:app
@@ -36,10 +46,3 @@ Make sure you have installed
 
         http://127.0.0.1:8000/
 
-
-Use Python 3.10 to set up and run with these commands:
-
-.. code-block:: sh
-
-   python -m venv venv
-   source venv/bin/activate
