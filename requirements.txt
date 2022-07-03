@@ -5,3 +5,4 @@ Flask-SQLAlchemy
 PIL
 flask_socketio
 gevent
+gevent-websocket

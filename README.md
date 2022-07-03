@@ -22,7 +22,7 @@ Make sure you have installed
            
         or 
           
-        pip install Flask Flask-Session Flask-SQLAlchemy faker PIL gevent flask_socketio
+        pip install Flask Flask-Session Flask-SQLAlchemy faker PIL gevent flask_socketio gevent-websocket
 
 * Setup sqlite database or anyother database
 

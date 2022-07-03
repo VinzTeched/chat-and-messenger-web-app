@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime
+from email.policy import default
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash
 
@@ -50,6 +51,8 @@ class Message(db.Model):
     date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
     attachement = db.Column(db.String(100), nullable=True)
     message = db.Column(db.String(500), nullable=True)
+    status = db.Column(db.Integer, nullable=True, default="sent")
+    views = db.Column(db.Integer, nullable=True, default=0)
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)

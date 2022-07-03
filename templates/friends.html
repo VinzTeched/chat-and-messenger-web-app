@@ -5,6 +5,10 @@
     <body>
         {% for friend in friends %}
           {% if friend.user.id != session['user_id'] %}
+
+          <form hx-post="/check-count" hx-trigger="load delay:100ms" hx-target="#count-result">
+              <input id="count" name="count" type="hidden" value="{{friend.user.id}}" >
+          </form>
             <!-- start message -->
             <div class="list-group-item list-group-item-action hans getFriendMessage hana{{friend.user.id}} {% if friend.user.id == session['friend_id'] %} active {% endif %}" style="cursor: pointer;" id="message-{{friend.user.id}}">
               <div class="row">
@@ -20,14 +24,14 @@
                   </div>
                   <div class="d-flex w-100 align-items-center justify-content-between pe-2">
                     <div class="inpm">{% if friend.message %} {{friend.message}} {% endif %}</div>
-                    <div class="capol"><span class="innerlabel text-white badge rounded-pill" aria-label="3 unread messages">2  </span></div>
+                    <div class="capol" id="count-result"></div>
                   </div>
                 </div>
               </div>
             </div>
             <!-- End messages -->
             {% endif %}
-            {% endfor %}
+          {% endfor %}
 
 
   <script src="/static/main.js"></script>

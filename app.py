@@ -3,8 +3,6 @@ monkey.patch_all()
 from flask_socketio import SocketIO
 from email import message
 import os
-from crypt import methods
-from datetime import datetime, timedelta
 from email.policy import default
 import mimetypes
 from re import sub
@@ -12,11 +10,8 @@ from unittest import result
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 #from flask_mail import Mail, Message
-from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
-from itertools import groupby
-from operator import attrgetter
 from models import User, Message, user_friend
 
 from helpers import login_required, user_image
@@ -305,6 +300,10 @@ def getMessage():
     messages = Message.query.filter(db.or_(db.and_(Message.user_id.like(user_id), Message.friend_id.like(friend_id)), db.and_(Message.friend_id.like(user_id), Message.user_id.like(friend_id))))
 
     session['friend_id'] = int(friend_id)
+    query = db.session.query(Message).filter(Message.friend_id==user_id).all()
+    for c in query:
+        c.views = 1
+    db.session.commit()
     #return jsonify(messages)
     return render_template('messages.html', messages=messages)
 
@@ -375,6 +374,13 @@ def updateProfile():
     return "<span style='color:green'>Profile Updated</span>"
 
 
+@app.route('/check-count', methods=['POST'])
+def checkCount():
+    id = session["user_id"]
+    friend_id = int(request.form.get("count"))
+    count = db.session.query(db.func.count(Message.id)).filter(db.and_(Message.friend_id.like(id), Message.user_id.like(friend_id))).filter(Message.views==0).scalar()
+    return render_template("count.html", count=count)
+
 @app.route('/contact-info', methods=['GET'])
 def contactInfo():
     session_friend = session['friend_id']
@@ -388,6 +394,10 @@ def handle_message(data):
 def loadData():
     print("Data updated")
     socketio.emit('dataUpdated', {'data': 42})
+
+def showCount():
+    print("Count updated")
+    socketio.emit('updateCount', {'data': 42})
 
 @app.route('/<name>/<location>')
 def gjsk(name, location):
