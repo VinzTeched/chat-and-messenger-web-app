@@ -171,4 +171,6 @@ static/images/favicon_io.zip
 static/images/site.webmanifest
 **/static/images/favicon_io.zip
 **/static/images/site.webmanifest
+app-new.py
+app-old.py
 

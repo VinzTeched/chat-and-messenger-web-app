@@ -6,7 +6,7 @@
         {% for friend in friends %}
           {% if friend.user.id != session['user_id'] %}
             <!-- start message -->
-            <div class="list-group-item list-group-item-action hans getFriendMessage hana{{friend.user.id}}" style="cursor: pointer;" id="message-{{friend.user.id}}">
+            <div class="list-group-item list-group-item-action hans getFriendMessage hana{{friend.user.id}} {% if friend.user.id == session['friend_id'] %} active {% endif %}" style="cursor: pointer;" id="message-{{friend.user.id}}">
               <div class="row">
                 <div class="col-lg-2">
                   <div class="d-flex w-100 align-items-center justify-content-between">
@@ -16,7 +16,7 @@
                 <div class="col-lg-10">
                   <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
                       <span class="profile-name">{{ friend.user.name }}</span>
-                      <small class="profile-date text-muted dateof{{friend.user.id}}">Saturday</small>
+                      <small class="profile-date dateof{{friend.user.id}} {% if friend.user.id != session['friend_id'] %} text-muted {% endif %}">{{friend.date.strftime('%Y-%m-%d')}}</small>
                   </div>
                   <div class="d-flex w-100 align-items-center justify-content-between pe-2">
                     <div class="inpm">{% if friend.message %} {{friend.message}} {% endif %}</div>

@@ -10,7 +10,6 @@
     <title>Vinochat - Chat away with friends</title>
     <link href="/static/bootstrap.min.css" rel="stylesheet">
     <link href="/static/main.css" rel="stylesheet">
-
   </head>
   <body>
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -381,30 +380,8 @@
           <div class="sidebar-sticky ">
           <div class="list-group list-group-flush border-bottom">
 
-            <div id="friend-result" hx-get="/all-user-message" hx-trigger="load, every 10s">
-              {% for friend in friends %}
-              <!-- start message -->
-              <div class="list-group-item list-group-item-action hans getFriendMessage hana{{friend.user.id}}" style="cursor: pointer;" id="message-{{friend.user.id}}">
-                <div class="row">
-                  <div class="col-lg-2">
-                    <div class="d-flex w-100 align-items-center justify-content-between">
-                    <span class="chat-profile-div"><img src="{{ friend.user.image | user_image }}" class="chat-profile-icon" draggable="false"></span>
-                    </div>
-                  </div>
-                  <div class="col-lg-10">
-                    <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
-                        <span class="profile-name">{{ friend.user.name }}</span>
-                        <small class="profile-date text-muted dateof{{friend.user.id}}">Saturday</small>
-                    </div>
-                    <div class="d-flex w-100 align-items-center justify-content-between pe-2">
-                      <div class="inpm">{% if friend.message %} friend.message {% endif %}</div>
-                      <div class="capol"><span class="innerlabel text-white badge rounded-pill" aria-label="3 unread messages">2  </span></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- End messages -->
-              {% endfor %}  
+            <div id="friend-result" hx-get="/all-user-message" hx-trigger="load, click">
+             
             </div>
 
           </div>
@@ -428,26 +405,10 @@
           <div class="offcanvas-body">
 
             <div id="contact-info">
-
-              <div class="d-flex w-100 align-items-center justify-content-between pe-2 pt-1">
-                <div class="photopicker" title="Photo Viewer">
-                    <img id="imagetag" src="{{ friend.image | user_image }}"  alt="profile image"/>
-                </div>
-              </div>
-    
-              <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" disabled name="name" placeholder="John Doe" value="{{ friend.name }}">
-              </div>
-    
-              <div class="mb-3">
-                <label for="about" class="form-label">About</label>
-                <textarea class="form-control" id="about" disabled rows="3" name="about">{{ friend.about }}</textarea>
-              </div>
             
             </div>
 
-          </div>
+          </div> 
         </div>
       </div>
     </nav>
@@ -465,7 +426,7 @@
         <div class="content-sticky">
 
 
-          <div id="message-result" hx-get="/retrieve-message" hx-trigger="click, every 10s"> 
+          <div id="message-result" class="message-result" hx-get="/retrieve-message" hx-trigger="click"> 
        
           </div>
 
@@ -489,8 +450,25 @@
 </div>
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
   <script src="/static/jquery-3.6.0.min.js"></script>
   <script src="/static/bootstrap.bundle.min.js"></script>
+
+  <script type="text/javascript" charset="utf-8">
+    $(document).ready(function(e){
+       var socket = io.connect('http://127.0.0.1:8000');
+       socket.on('connect', function() {
+           socket.emit('message', {data: 'I\'m connected!'});
+           //socket.send('connected')
+       });
+
+       socket.on('dataUpdated', function() {
+          console.log("Received");
+          $('#friend-result').trigger('click');
+          $('.message-result').trigger('click');
+       });
+     });
+ </script>
   <script>
     $('#imagetag').click(function(){
       $('#upload').click();
@@ -530,5 +508,6 @@
   <script src="/static/main.js"></script>
 
 <script src="https://unpkg.com/htmx.org@1.7.0" integrity="sha384-EzBXYPt0/T6gxNp0nuPtLkmRpmDBbjg6WmCUZRLXBBwYYmwAUxzlSGej0ARHX0Bo" crossorigin="anonymous"></script>
+
   </body>
 </html>

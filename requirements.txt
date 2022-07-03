@@ -1,2 +1,7 @@
 Flask
 Flask-Session
+faker
+Flask-SQLAlchemy
+PIL
+flask_socketio
+gevent

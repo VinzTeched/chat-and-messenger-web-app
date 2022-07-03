@@ -1,3 +1,6 @@
+from gevent import monkey
+monkey.patch_all()
+from flask_socketio import SocketIO
 from email import message
 import os
 from crypt import methods
@@ -6,19 +9,15 @@ from email.policy import default
 import mimetypes
 from re import sub
 from unittest import result
-from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify, Response
-from sqlalchemy import alias, exists, subquery, text
+from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 #from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
-import random
-import builtins
-import json
-import jsonpickle
+from itertools import groupby
+from operator import attrgetter
 from models import User, Message, user_friend
-from sqlalchemy.orm import aliased
 
 from helpers import login_required, user_image
 from image import createImage
@@ -29,6 +28,9 @@ UPLOAD_FOLDER = 'static/images/users'
 ALLOWED_EXTENSIONS = set(['png', 'jpeg', 'jpg'])
 
 app = Flask("__name__")
+# socketio for server to client event
+app.config['SECRET_KEY'] = 'itsyoursecret!'
+socketio = SocketIO(app)
 
 # Profile Images Upload Folder
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -51,6 +53,7 @@ app.config["MAIL_USE_TLS"] = True
 app.config["MAIL_USERNAME"] = "os.environ['MAIL_USERNAME']"
 #mail = Mail(app)
 
+
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
@@ -72,7 +75,7 @@ def after_request(response):
 def login():
     """Log user in"""
 
-    # Forget any user_id sandraperez@example.com
+    # Forget any user_id 
     session.clear()
 
     # User reached route via POST (as by submitting a form via POST)
@@ -227,6 +230,7 @@ def newFriend():
     friend = User.query.filter_by(id=friend_id).first()
     user = User.query.filter_by(id=id).first()
     sendNewFriendMessage(id, friend_id)
+    loadData()
     user.friends.append(friend)
     db.session.commit()
     return "success"
@@ -320,7 +324,7 @@ def sendMessage():
         db.session.commit()
 
     messages = Message.query.filter(db.or_(db.and_(Message.user_id.like(user_id), Message.friend_id.like(friend_id)), db.and_(Message.friend_id.like(user_id), Message.user_id.like(friend_id))))
-
+    loadData()
     return render_template('messages.html', messages=messages)
 
 def allowed_file(filename):
@@ -331,7 +335,7 @@ def allowed_file(filename):
 def getAllUserMessage():
     id = session['user_id']
 
-    friends = Message.query.filter(db.or_(Message.friend_id.like(id), Message.user_id.like(id))).join(User, User.id == Message.send_id).group_by(Message.send_id).order_by(Message.date.desc()).all()
+    friends = Message.query.filter(db.or_(Message.friend_id.like(id), Message.user_id.like(id))).group_by(Message.send_id).order_by(db.desc(Message.date), db.func.max(Message.date)).all()
 
     return render_template('friends.html', friends=friends)
 
@@ -371,12 +375,19 @@ def updateProfile():
     return "<span style='color:green'>Profile Updated</span>"
 
 
-
 @app.route('/contact-info', methods=['GET'])
 def contactInfo():
     session_friend = session['friend_id']
     friend = User.query.filter_by(id=session_friend).first()
     return render_template('contact.html', friend=friend)
+
+@socketio.on('message')
+def handle_message(data):
+    print(data)
+
+def loadData():
+    print("Data updated")
+    socketio.emit('dataUpdated', {'data': 42})
 
 @app.route('/<name>/<location>')
 def gjsk(name, location):
@@ -395,3 +406,6 @@ def logout():
 
     # Redirect user to login form
     return redirect("/")
+
+if __name__ == '__main__':
+    socketio.run(app)
