@@ -417,3 +417,21 @@ button {
 .useColor{
     color: midnightblue;
 }
+
+.fileDisplay{
+    background-color: rgb(233, 254, 255);
+    width: 300px;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.imageDisplay{
+    width: 300px !important;
+    height: auto;
+}
+
+.inner-image-send{
+    background: rgb(249, 253, 246) !important;
+    padding: 4px !important;
+}

@@ -4,7 +4,7 @@
     <body>
        {% for message in messages %}
 
-       {% if message.message != None %}
+       {% if message.message != None and message.attachement == None%}
             {% if message.user_id != session['user_id'] %}
                 
             <!-- receive message -->
@@ -12,6 +12,7 @@
                 <div class="inner-text">
                 <div class="userams">
                     {{ message.message|default('&nbsp;', true) }}
+                    
                 </div>
                 </div>
             </div>
@@ -26,6 +27,69 @@
                 <div class="inner-text-send">
                 <div class="userams">
                     {{ message.message }} 
+                </div>
+                </div>
+            </div>
+            <!-- end send message -->
+        {% endif %}
+
+        {% endif %}
+
+       {% if message.attachement != None and message.message == None %}
+            {% if message.user_id != session['user_id'] %}
+                
+            <!-- receive message -->
+            <div class="receive">
+                <div class="inner-text inner-image-send">
+                <div class="userams">
+                    <img src="{{ message.attachement | user_image }}" class="imageDisplay">
+                </div>
+                </div>
+            </div>
+            <!-- end receive message -->
+        {% endif %}
+
+            <!--div class="divider"></div-->
+
+        {% if message.user_id == session['user_id'] %} 
+            <!-- send message -->
+            <div class="send">
+                <div class="inner-text-send inner-image-send">
+                <div class="userams">
+                    <img src="{{ message.attachement | user_image }}" class="imageDisplay">
+                   
+                </div>
+                </div>
+            </div>
+            <!-- end send message -->
+        {% endif %}
+
+        {% endif %}
+
+       {% if message.attachement != None and message.message != None %}
+            {% if message.user_id != session['user_id'] %}
+                
+            <!-- receive message -->
+            <div class="receive">
+                <div class="inner-text inner-image-send">
+                <div class="userams">
+                    <img src="{{ message.attachement | user_image }}" class="imageDisplay">
+                    <p class="mt-2 ms-1">{{ message.message }} </p>
+                </div>
+                </div>
+            </div>
+            <!-- end receive message -->
+        {% endif %}
+
+            <!--div class="divider"></div-->
+
+        {% if message.user_id == session['user_id'] %} 
+            <!-- send message -->
+            <div class="send">
+                <div class="inner-text-send inner-image-send">
+                <div class="userams">
+                    <img src="{{ message.attachement | user_image }}" class="imageDisplay">
+                    <p class="mt-2 ms-1">{{ message.message }} </p>
                 </div>
                 </div>
             </div>

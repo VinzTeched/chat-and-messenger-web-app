@@ -308,27 +308,38 @@ def getMessage():
     return render_template('messages.html', messages=messages)
 
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/send-message', methods=['POST'])
 def sendMessage():
     user_id = session['user_id']
     friend_id = session['friend_id']
     message = request.form.get("message")
 
-    if not message:
-        return "Error"
+    if not message and 'file' not in request.files:
+        return render_template('form.html')      
 
-    if message:
-        query = Message(user_id=user_id, friend_id=friend_id, send_id=user_id, message=message)
-        db.session.add(query)
-        db.session.commit()
+    if 'file' in request.files:
+        file = request.files['file']
 
+        if file.filename == '':
+            return "No file selected"
+        
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(path)
+    else:
+        filename = None
+
+    query = Message(user_id=user_id, friend_id=friend_id, send_id=user_id, message=message, attachement=filename) 
+    db.session.add(query)
+    db.session.commit()
     messages = Message.query.filter(db.or_(db.and_(Message.user_id.like(user_id), Message.friend_id.like(friend_id)), db.and_(Message.friend_id.like(user_id), Message.user_id.like(friend_id))))
     loadData()
-    return render_template('messages.html', messages=messages)
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return render_template('form.html', messages=messages)
 
 @app.route('/all-user-message', methods=['GET'])
 def getAllUserMessage():
