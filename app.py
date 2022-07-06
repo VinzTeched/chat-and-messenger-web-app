@@ -297,7 +297,7 @@ def getMessage():
     if not friend_id:
         flash("User not found!")
         return redirect("/")
-    messages = Message.query.filter(db.or_(db.and_(Message.user_id.like(user_id), Message.friend_id.like(friend_id)), db.and_(Message.friend_id.like(user_id), Message.user_id.like(friend_id))))
+    messages = Message.query.filter(db.or_(db.and_(Message.user_id.like(user_id), Message.friend_id.like(friend_id)), db.and_(Message.friend_id.like(user_id), Message.user_id.like(friend_id)))).group_by(Message.date)
 
     session['friend_id'] = int(friend_id)
     query = db.session.query(Message).filter(Message.friend_id==user_id).all()
@@ -409,6 +409,16 @@ def loadData():
 def showCount():
     print("Count updated")
     socketio.emit('updateCount', {'data': 42})
+
+@app.route('/delete-message', methods=['POST'])
+def deleteMessage():
+    messageId = request.form.get("messageId")
+    if messageId:
+        query = Message.query.filter_by(id=messageId).one()
+    db.session.delete(query)
+    db.session.commit()
+    loadData()
+    return render_template('form.html')
 
 @app.route('/<name>/<location>')
 def gjsk(name, location):

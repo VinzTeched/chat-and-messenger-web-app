@@ -2,6 +2,7 @@
 <html>
     <head></head>
     <body>
+
        {% for message in messages %}
 
        {% if message.message != None and message.attachement == None%}
@@ -12,10 +13,12 @@
                 <div class="inner-text">
                 <div class="userams">
                     {{ message.message|default('&nbsp;', true) }}
-                    
                 </div>
+                <div class="date_hidb">{{ message.date.strftime('%a, %-d %b %Y %-I:%M %p').replace('AM', 'am').replace('PM', 'pm') }}</div>
                 </div>
             </div>
+
+
             <!-- end receive message -->
         {% endif %}
 
@@ -25,15 +28,30 @@
             <!-- send message -->
             <div class="send">
                 <div class="inner-text-send">
-                <div class="userams">
-                    {{ message.message }} 
-                </div>
+                    <div class="showUnov">
+                        <button class="info_hub" type="button" data-bs-toggle="dropdown" aria-expanded="false"><span class="bg-njide"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" stroke="#667781" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                        </svg></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Reply Message</a></li>
+                            <li><a class="dropdown-item" href="#">Forward Message</a></li>
+                            <li><a data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="{{message.id}}" title="Delete Message" class="openDeleteMessageDialog dropdown-item" href="#deleteMessage">Delete Message</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="userams">
+                        {{ message.message }} 
+                    </div>
+                    <div class="date_hidb">{{ message.date.strftime('%a, %-d %b %Y %-I:%M %p').replace('AM', 'am').replace('PM', 'pm') }}</div>
                 </div>
             </div>
             <!-- end send message -->
+
         {% endif %}
 
         {% endif %}
+        
 
        {% if message.attachement != None and message.message == None %}
             {% if message.user_id != session['user_id'] %}
@@ -44,6 +62,7 @@
                 <div class="userams">
                     <img src="{{ message.attachement | user_image }}" class="imageDisplay">
                 </div>
+                <div class="date_hidb">{{ message.date.strftime('%a, %-d %b %Y %-I:%M %p').replace('AM', 'am').replace('PM', 'pm') }}</div>
                 </div>
             </div>
             <!-- end receive message -->
@@ -55,10 +74,23 @@
             <!-- send message -->
             <div class="send">
                 <div class="inner-text-send inner-image-send">
+                    <div class="showUnov">
+                        <button class="info_hub" type="button" data-bs-toggle="dropdown" aria-expanded="false"><span class="bg-njide"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" stroke="#667781" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                        </svg></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Reply Message</a></li>
+                            <li><a class="dropdown-item" href="#">Forward Message</a></li>
+                            <li><a data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="{{message.id}}" title="Delete Message" class="openDeleteMessageDialog dropdown-item" href="#deleteMessage">Delete Message</a>
+                            </li>
+                        </ul>
+                    </div>
                 <div class="userams">
                     <img src="{{ message.attachement | user_image }}" class="imageDisplay">
                    
                 </div>
+                <div class="date_hidb">{{ message.date.strftime('%a, %-d %b %Y %-I:%M %p').replace('AM', 'am').replace('PM', 'pm') }}</div>
                 </div>
             </div>
             <!-- end send message -->
@@ -76,6 +108,7 @@
                     <img src="{{ message.attachement | user_image }}" class="imageDisplay">
                     <p class="mt-2 ms-1">{{ message.message }} </p>
                 </div>
+                <div class="date_hidb">{{ message.date.strftime('%a, %-d %b %Y %-I:%M %p').replace('AM', 'am').replace('PM', 'pm') }}</div>
                 </div>
             </div>
             <!-- end receive message -->
@@ -87,10 +120,23 @@
             <!-- send message -->
             <div class="send">
                 <div class="inner-text-send inner-image-send">
+                    <div class="showUnov">
+                        <button class="info_hub" type="button" data-bs-toggle="dropdown" aria-expanded="false"><span class="bg-njide"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" stroke="#667781" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                        </svg></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Reply Message</a></li>
+                            <li><a class="dropdown-item" href="#">Forward Message</a></li>
+                            <li><a data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="{{message.id}}" title="Delete Message" class="openDeleteMessageDialog dropdown-item" href="#deleteMessage">Delete Message</a>
+                            </li>
+                        </ul>
+                    </div>
                 <div class="userams">
                     <img src="{{ message.attachement | user_image }}" class="imageDisplay">
                     <p class="mt-2 ms-1">{{ message.message }} </p>
                 </div>
+                <div class="date_hidb">{{ message.date.strftime('%a, %-d %b %Y %-I:%M %p').replace('AM', 'am').replace('PM', 'pm') }}</div>
                 </div>
             </div>
             <!-- end send message -->
@@ -99,6 +145,8 @@
         {% endif %}
 
        {% endfor %}
-      
+
+
+
     </body>
 </html>

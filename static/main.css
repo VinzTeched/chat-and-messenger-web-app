@@ -197,6 +197,7 @@ button {
     max-width: 65%;
     float: left;
     clear: both;
+    position: relative;
     margin-top: .3rem;
     padding: 6px 7px 8px 9px;
     border-radius: 8px;   
@@ -207,6 +208,7 @@ button {
     background: rgb(220, 255, 201);
     max-width: 65%;
     float: right;
+    position: relative;
     clear: both;
     margin-top: .3rem;
     padding: 6px 7px 8px 9px;
@@ -435,3 +437,67 @@ button {
     background: rgb(249, 253, 246) !important;
     padding: 4px !important;
 }
+
+.message-date{
+    padding: 5px 12px 6px;
+    text-align: center;
+    text-shadow: 0 1px 0 rgba(var(--inverse-rgb),.4);
+    background-color: var(--system-message-background);
+    border-radius: 7.5px;
+    box-shadow: 0 1px 0.5px rgba(var(--shadow-rgb),.13);
+    box-sizing: border-box;
+    display: inline-block;
+    flex: none;
+    max-width: 100%!important;
+    font-size: 12.5px;
+    line-height: 21px;
+    color: #667781;
+    position: relative;
+}
+
+.date_hidb{
+    font-size: 0.6875rem;
+    color: #667781;
+    float: right;
+}
+
+.inner-text-send:hover .info_hub{
+    display: block;
+}
+
+.info_hub{
+    color: #667781;
+    max-width: inherit;
+    right: 0;
+    z-index: 99;
+    cursor: pointer !important;
+    position: absolute;
+    display: none;
+    padding-right: 3px;
+}
+
+.info_hub_receive{
+    color: #667781;
+    max-width: inherit;
+    z-index: 99;
+    right: 0;
+    cursor: pointer !important;
+    position: absolute;
+    display: none;
+    padding-right: 3px;
+}
+
+.inner-text:hover .info_hub_receive{
+    display: block;
+}
+
+.bg-njide{
+    background-color: rgb(220, 255, 201);
+}
+
+.bg-njideocha{
+    background-color: rgb(252, 253, 251);
+}
+
+.bg-njide-trans{}
+

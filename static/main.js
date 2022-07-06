@@ -38,7 +38,7 @@
             $(".shownow").css("display", "block");
             $(".hidenow").css("display", "none");
             $('#findFriendName').trigger('click');
-            $('#message-result').trigger('click');
+            $('#triggerLoad').trigger('click');
             $('#contact-info').trigger('click');
             $('.hana'+id).addClass("active");
             $('.dateof'+id).removeClass("text-muted");
