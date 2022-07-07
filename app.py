@@ -289,6 +289,18 @@ def retrieveFriend():
     friend = User.query.filter_by(id=friend_id).first()
     return render_template('fhead.html', friend=friend)
 
+@app.route('/retrieve-user', methods=['GET'])
+def retrieveUser():
+    id = session['user_id']
+    user = User.query.filter_by(id=id).first()
+    return render_template('loaduser.html', user=user)
+
+@app.route('/retrieve-user-image', methods=['GET'])
+def retrieveUserImage():
+    id = session['user_id']
+    user = User.query.filter_by(id=id).first()
+    return render_template('userimage.html', user=user)
+
 @app.route('/get-message', methods=['POST'])
 def getMessage():
     user_id = session['user_id']
@@ -381,6 +393,7 @@ def updateProfile():
     user.about = about
     user.image = filename
     db.session.commit()
+    loadData()
 
     return "<span style='color:green'>Profile Updated</span>"
 
