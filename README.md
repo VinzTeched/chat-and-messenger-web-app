@@ -46,3 +46,7 @@ Make sure you have installed
 
         http://127.0.0.1:8000/
 
+
+* A view of the web app
+
+  ![Vinochat Web App](screenshots/vinochat-home.png)
