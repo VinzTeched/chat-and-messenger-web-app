@@ -1,3 +1,4 @@
+import email
 from gevent import monkey
 monkey.patch_all()
 from flask_socketio import SocketIO
@@ -312,7 +313,7 @@ def getMessage():
     messages = Message.query.filter(db.or_(db.and_(Message.user_id.like(user_id), Message.friend_id.like(friend_id)), db.and_(Message.friend_id.like(user_id), Message.user_id.like(friend_id)))).group_by(Message.date)
 
     session['friend_id'] = int(friend_id)
-    query = db.session.query(Message).filter(Message.friend_id==user_id).all()
+    query = db.session.query(Message).filter(db.and_(Message.friend_id.like(user_id), Message.user_id.like(friend_id))).all()
     for c in query:
         c.views = 1
     db.session.commit()
@@ -357,7 +358,7 @@ def sendMessage():
 def getAllUserMessage():
     id = session['user_id']
 
-    friends = Message.query.filter(db.or_(Message.friend_id.like(id), Message.user_id.like(id))).group_by(Message.send_id).order_by(db.desc(Message.date), db.func.max(Message.date)).all()
+    friends = db.session.query(Message).filter(db.or_(Message.friend_id.like(id), Message.user_id.like(id))).group_by(Message.send_id).order_by(db.desc(Message.date), db.func.max(Message.date)).all()
 
     return render_template('friends.html', friends=friends)
 
@@ -433,9 +434,9 @@ def deleteMessage():
     loadData()
     return render_template('form.html')
 
-@app.route('/<name>/<location>')
+@app.route('/<name>/<email>')
 def gjsk(name, location):
-    user = User(name=name, location=location)
+    user = User(name=name, email=email)
     db.session.add(user)
     db.session.commit()
 
