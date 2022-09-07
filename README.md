@@ -1,7 +1,7 @@
 # chat-and-messenger-with-python-flask
 ===================
 
-### A simple chat and messenger app written with flask
+### A simple chat and messenger app written with flask - python
 
 ## Prerequisite
 Make sure you have installed python :) 
