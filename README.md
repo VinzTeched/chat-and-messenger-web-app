@@ -13,7 +13,7 @@ Make sure you have installed
 
 * Clone the repository
 
-        git clone https://github.com/VinzTeched/chat-and-messenger-with-python-flask.git   
+        git clone https://github.com/VinzTeched/chat-and-messenger-web-app.git   
         cd chat-and-messenger-with-python-flask
 
 * Install dependencies, (use sudo if required)    
